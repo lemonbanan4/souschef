@@ -65,6 +65,10 @@ import LevelUpOverlay from "./components/LevelUpOverlay";
 import ShareModal from "./components/ShareModal";
 import ProfilePage from "./components/ProfilePage";
 import LeaderboardModal from "./components/LeaderboardModal";
+import Onboarding, { shouldShowOnboarding } from "./components/Onboarding";
+import { DAILY_BONUS_XP, claimDailyVisit } from "./lib/dailyBonus";
+import { leaderboardAvailable } from "./lib/leaderboard";
+import { localDateKey } from "./lib/date";
 
 const SAVED_KEY = "souschef.cookbook";
 const PLAN_KEY = "souschef.plan";
@@ -161,6 +165,8 @@ export default function App() {
   const [ginoMood, setGinoMood] = useState<GinoMood>("happy");
   const [ginoMsg, setGinoMsg] = useState<GinoMessage | null>(null);
   const [burstEmojis, setBurstEmojis] = useState<{ id: number; left: number; delay: number; emoji: string }[]>([]);
+  const [xpBursts, setXpBursts] = useState<{ id: number; text: string }[]>([]);
+  const [badgeCelebration, setBadgeCelebration] = useState<Badge[] | null>(null);
   const [mysteryBasket, setMysteryBasket] = useState<string[] | null>(null);
   const [mysteryActive, setMysteryActive] = useState(false);
   const [fridgeScanning, setFridgeScanning] = useState(false);
@@ -168,6 +174,8 @@ export default function App() {
   const [lastGeneration, setLastGeneration] = useState<{ query: string; mystery: boolean } | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding(game.cooked));
+  const [hasLeaderboard, setHasLeaderboard] = useState(false);
   const [goalTick, setGoalTick] = useState(0);
   const recipeRef = useRef<HTMLDivElement>(null);
   const moodTimer = useRef<number | null>(null);
@@ -190,6 +198,13 @@ export default function App() {
   // game.cooked force a recheck whenever ProfilePage edits the goal or a cook logs nutrition
   const dietGoal = useMemo(() => loadDietGoal(), [goalTick]);
   const todayNutrition = useMemo(() => getTodayNutrition(), [goalTick, game.cooked]);
+  // Cooked yesterday but not yet today → the streak dies at midnight
+  const streakAtRisk = useMemo(() => {
+    if (game.streak < 2 || !game.lastCookDate) return false;
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return game.lastCookDate === localDateKey(yesterday);
+  }, [game.streak, game.lastCookDate]);
 
   const ginoSay = useCallback((mood: GinoMood, categoryOrText: GinoCategory | { text: string }, sticky = false) => {
     const text = typeof categoryOrText === "object" ? categoryOrText.text : ginoLine(categoryOrText);
@@ -201,10 +216,11 @@ export default function App() {
     }
   }, []);
 
-  // Greeting + kitchen quota on mount
+  // Greeting + kitchen quota + leaderboard availability on mount
   useEffect(() => {
     ginoSay("happy", "greeting");
     void fetchKitchenQuota().then(setQuota);
+    void leaderboardAvailable().then(setHasLeaderboard);
   }, [ginoSay]);
 
   useEffect(() => {
@@ -234,12 +250,37 @@ export default function App() {
   const celebrateBadges = useCallback(
     (newBadges: Badge[], startDelay = 400) => {
       if (newBadges.length === 0) return;
-      chime();
-      ginoSay("excited", "badge");
-      newBadges.forEach((b, i) => setTimeout(() => pushToast(`Badge unlocked: ${b.emoji} ${b.name}!`), startDelay + i * 700));
+      setTimeout(() => {
+        chime();
+        ginoSay("excited", "badge");
+        setBadgeCelebration((prev) => [...(prev ?? []), ...newBadges]);
+      }, startDelay);
     },
-    [ginoSay, pushToast],
+    [ginoSay],
   );
+
+  /** Floating "+N XP" text that drifts up from the bottom of the screen. */
+  const fireXpBurst = useCallback((text: string) => {
+    const id = Date.now() + Math.random();
+    setXpBursts((prev) => [...prev, { id, text }]);
+    setTimeout(() => setXpBursts((prev) => prev.filter((b) => b.id !== id)), 1900);
+  }, []);
+
+  // Once-per-day welcome-back bonus for returning cooks. claimDailyVisit() is
+  // self-guarding (second call the same day returns false), so StrictMode's
+  // double-mount can't double-award.
+  useEffect(() => {
+    if (!claimDailyVisit()) return;
+    const g = loadGame();
+    if (g.cooked === 0) return;
+    const { state, newBadges } = awardBonusXp(g, DAILY_BONUS_XP);
+    setGame(state);
+    setTimeout(() => {
+      fireXpBurst(`+${DAILY_BONUS_XP} XP`);
+      pushToast(`🌞 Buongiorno bonus — +${DAILY_BONUS_XP} XP for coming back!`);
+    }, 1200);
+    celebrateBadges(newBadges, 2400);
+  }, [fireXpBurst, pushToast, celebrateBadges]);
 
   const fireBurst = useCallback(() => {
     const emojis = ["✨", "⭐", "🎉", "🍳", "🏆", "💛"];
@@ -351,6 +392,9 @@ export default function App() {
     setGame(working);
     setCookedThis(true);
     fireBurst();
+    fireXpBurst(`+${cookResult.gainedXp} XP`);
+    if (mastery.justMastered) setTimeout(() => fireXpBurst("+100 XP 🌟"), 700);
+    if (wasMystery) setTimeout(() => fireXpBurst("+50 XP 🧺"), 1100);
     pop();
 
     if (questHit) {
@@ -675,10 +719,22 @@ export default function App() {
             </div>
           </div>
           <button className="icon-btn" onClick={() => setShowProfile(true)} title="Profile" aria-label="Profile">👤</button>
-          <button className="icon-btn" onClick={() => setShowLeaderboard(true)} title="Leaderboard" aria-label="Leaderboard">🥇</button>
+          {hasLeaderboard && (
+            <button className="icon-btn" onClick={() => setShowLeaderboard(true)} title="Leaderboard" aria-label="Leaderboard">🥇</button>
+          )}
           <button className="icon-btn" onClick={openSettings} title="Settings" aria-label="Settings">⚙️</button>
         </div>
       </header>
+
+      {/* Streak at risk — cooked yesterday, not yet today */}
+      {streakAtRisk && (
+        <div className="quest-banner streak-banner clay-yellow">
+          <span className="quest-emoji">🔥</span>
+          <span className="quest-text">
+            <strong>Your {game.streak}-day streak is on the line!</strong> Cook anything today to keep it burning.
+          </span>
+        </div>
+      )}
 
       {/* Daily quest */}
       <div className={`quest-banner clay-yellow ${questDone ? "done" : ""}`}>
@@ -1127,6 +1183,9 @@ export default function App() {
         <LeaderboardModal game={game} level={level} onClose={() => setShowLeaderboard(false)} />
       )}
 
+      {/* First-run onboarding */}
+      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
+
       {/* Share card modal */}
       {showShare && (
         <ShareModal
@@ -1163,9 +1222,11 @@ export default function App() {
                     <span className="quota-nums">{quota.usage[scope]} / {quota.limits[scope]}</span>
                   </div>
                 ))}
-                <button className="chip" onClick={handleDevUpgrade} style={{ marginTop: 10 }}>
-                  {quota.tier === "pro" ? "Switch back to Free (dev stub)" : "⭐ Upgrade to Pro — $4.99/mo (dev stub)"}
-                </button>
+                {import.meta.env.DEV && (
+                  <button className="chip" onClick={handleDevUpgrade} style={{ marginTop: 10 }}>
+                    {quota.tier === "pro" ? "Switch back to Free (dev stub)" : "⭐ Upgrade to Pro — $4.99/mo (dev stub)"}
+                  </button>
+                )}
               </div>
             )}
 
@@ -1217,6 +1278,12 @@ export default function App() {
               </div>
             </div>
 
+            <p className="privacy-note">
+              🔒 Everything you do here — recipes, XP, pantry, goals — lives only in this browser.
+              The only data that leaves your device is what's needed to generate recipes with AI
+              (and your chef name + score, if you join a leaderboard).
+            </p>
+
             <div className="modal-actions">
               <button className="ghost-btn" onClick={() => setShowSettings(false)}>Cancel</button>
               <button className="cook-btn" onClick={saveSettings}>Save</button>
@@ -1238,6 +1305,34 @@ export default function App() {
           {burstEmojis.map((p) => (
             <span key={p.id} style={{ left: `${p.left}%`, bottom: "30%", animationDelay: `${p.delay}s` }}>{p.emoji}</span>
           ))}
+        </div>
+      )}
+
+      {/* Floating +XP text */}
+      {xpBursts.length > 0 && (
+        <div className="xp-float-layer" aria-hidden="true">
+          {xpBursts.map((b) => (
+            <span key={b.id} className="xp-float">{b.text}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Badge unlock celebration */}
+      {badgeCelebration && badgeCelebration.length > 0 && (
+        <div className="modal-overlay badge-celebration-overlay" onClick={() => setBadgeCelebration(null)}>
+          <div className="badge-celebration clay" onClick={(e) => e.stopPropagation()}>
+            <div className="badge-celebration-kicker">Badge unlocked!</div>
+            <div className="badge-celebration-row">
+              {badgeCelebration.map((b) => (
+                <div key={b.id} className="badge-celebration-item">
+                  <div className="badge-celebration-emoji">{b.emoji}</div>
+                  <div className="badge-celebration-name">{b.name}</div>
+                  <div className="badge-celebration-desc">{b.description}</div>
+                </div>
+              ))}
+            </div>
+            <button className="cook-btn" onClick={() => setBadgeCelebration(null)}>Grazie, Gino! 🎉</button>
+          </div>
         </div>
       )}
     </>

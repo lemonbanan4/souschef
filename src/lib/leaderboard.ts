@@ -36,3 +36,8 @@ export async function fetchLeaderboard(): Promise<LeaderboardResult | null> {
     return null;
   }
 }
+
+/** Feature probe: is a leaderboard-capable server reachable at all? Hides the 🥇 button when not. */
+export async function leaderboardAvailable(): Promise<boolean> {
+  return (await fetchLeaderboard()) !== null;
+}

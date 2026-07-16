@@ -79,6 +79,15 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
   has an export button (downloads a dated `souschef-backup-*.json`) and an
   import button to restore it — a safety net before clearing site data or
   switching devices/browsers.
+- **First-run onboarding** — a 3-step Gino-guided tour for brand-new users
+  (skippable, shown once).
+- **Offline PWA** — a Workbox service worker precaches the app shell, so the
+  installed app opens (in demo mode) with no network at all.
+- **Release polish** — floating "+XP" bursts on every cook, a proper
+  badge-unlock celebration overlay, a "your streak is on the line" banner
+  when yesterday's streak hasn't been fed today, a once-a-day welcome-back
+  XP bonus, a Gino-branded crash screen (React error boundary), OG/Twitter
+  card tags with a 1200×630 social image, and a privacy note in Settings.
 
 Everything (game state, cookbook, API key) is stored in `localStorage` —
 no backend (aside from the optional kitchen proxy and leaderboard).
@@ -89,6 +98,21 @@ no backend (aside from the optional kitchen proxy and leaderboard).
 npm install
 npm run dev
 ```
+
+## Production
+
+```bash
+npm run build   # type-check + bundle + service worker → dist/
+npm start       # standalone Node server: dist/ + the kitchen API on :8787
+```
+
+`server/standalone.ts` reuses the exact same kitchen-proxy handlers Vite
+mounts in dev, adds per-IP rate limiting, and serves the built app with an
+SPA fallback — plain Node ≥ 23 (native TypeScript), no extra runtime deps.
+Set `PORT` to override, and provide `ANTHROPIC_API_KEY` in the environment
+to enable the AI kitchen (otherwise clients get BYOK/demo mode).
+Before going public: swap `og:url`/`og:image` in `index.html` to absolute
+URLs on the real domain.
 
 ## Three ways to power the chef
 

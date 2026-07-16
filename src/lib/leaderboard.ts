@@ -1,5 +1,6 @@
 import type { LeaderboardResult } from "../types";
 import { deviceId } from "./ai";
+import { API_BASE } from "./apiBase";
 
 /**
  * LAN kitchen leaderboard — backed by the same dev-server proxy as the AI
@@ -16,7 +17,7 @@ export async function submitToLeaderboard(stats: {
   badges: number;
 }): Promise<boolean> {
   try {
-    const res = await fetch("/api/leaderboard/submit", {
+    const res = await fetch(`${API_BASE}/api/leaderboard/submit`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-device-id": deviceId() },
       body: JSON.stringify(stats),
@@ -29,7 +30,7 @@ export async function submitToLeaderboard(stats: {
 
 export async function fetchLeaderboard(): Promise<LeaderboardResult | null> {
   try {
-    const res = await fetch("/api/leaderboard/top", { headers: { "x-device-id": deviceId() } });
+    const res = await fetch(`${API_BASE}/api/leaderboard/top`, { headers: { "x-device-id": deviceId() } });
     if (!res.ok) return null;
     return (await res.json()) as LeaderboardResult;
   } catch {

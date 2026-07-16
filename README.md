@@ -119,6 +119,41 @@ to enable the AI kitchen (otherwise clients get BYOK/demo mode).
 Before going public: swap `og:url`/`og:image` in `index.html` to absolute
 URLs on the real domain.
 
+### Deploy to Railway
+
+The repo ships a `Dockerfile` + `railway.toml`, so deployment is:
+
+```bash
+railway login          # one-time, opens the browser
+railway init           # create the project (pick a name)
+railway up             # build & deploy
+railway domain         # mint the public https URL
+railway variables --set ANTHROPIC_API_KEY=sk-ant-…   # enable the AI kitchen
+```
+
+Note: `server/usage.json` and `server/leaderboard.json` are ephemeral in a
+container — add a Railway volume (or swap for KV/Postgres) when metering
+needs to survive redeploys.
+
+## iOS & Android (Capacitor)
+
+The native projects live in `ios/` and `android/`, with app icons and
+splash screens generated from `assets/` (source images). Workflow:
+
+```bash
+# Point native builds at your deployed kitchen, rebuild web, copy into native
+VITE_API_BASE=https://<your-railway-domain> npm run mobile:sync
+
+npm run mobile:ios       # opens Xcode — run on simulator/device from there
+npm run mobile:android   # opens Android Studio
+```
+
+Both projects build out of the box (`xcodebuild` for the simulator and
+`gradlew assembleDebug` verified). For store releases you'll need an Apple
+Developer account (signing) and a Play Console account (keystore + AAB).
+Regenerate icons/splashes after art changes with
+`npx @capacitor/assets generate --ios --android`.
+
 ## Three ways to power the chef
 
 1. **Kitchen proxy (the product architecture)** — `server/chef-api.ts` runs as

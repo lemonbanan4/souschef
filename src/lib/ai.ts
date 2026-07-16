@@ -15,6 +15,7 @@ import {
 } from "./schemas";
 import { makeId } from "./id";
 import { safeSet } from "./storage";
+import { API_BASE } from "./apiBase";
 
 /**
  * Three ways to reach the chef, in order of preference:
@@ -83,7 +84,7 @@ function toChefError(error: unknown): ChefError {
 async function proxyPost(path: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
   let res: Response;
   try {
-    res = await fetch(`/api/chef/${path}`, {
+    res = await fetch(`${API_BASE}/api/chef/${path}`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-device-id": deviceId() },
       body: JSON.stringify({ ...body, taste: tasteSummary() }),
@@ -115,7 +116,7 @@ async function proxyPost(path: string, body: Record<string, unknown>): Promise<R
 
 export async function fetchKitchenQuota(): Promise<KitchenQuota | null> {
   try {
-    const res = await fetch("/api/chef/quota", { headers: { "x-device-id": deviceId() } });
+    const res = await fetch(`${API_BASE}/api/chef/quota`, { headers: { "x-device-id": deviceId() } });
     if (!res.ok) return null;
     return (await res.json()) as KitchenQuota;
   } catch {
@@ -126,7 +127,7 @@ export async function fetchKitchenQuota(): Promise<KitchenQuota | null> {
 /** DEV STUB — production replaces this with Stripe Checkout. */
 export async function devToggleProTier(): Promise<KitchenQuota | null> {
   try {
-    const res = await fetch("/api/billing/upgrade", {
+    const res = await fetch(`${API_BASE}/api/billing/upgrade`, {
       method: "POST",
       headers: { "x-device-id": deviceId() },
     });

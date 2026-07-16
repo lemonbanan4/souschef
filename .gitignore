@@ -26,3 +26,9 @@ dist-ssr
 # souschef local usage store (dev metering)
 server/usage.json
 server/leaderboard.json
+
+# Capacitor native projects — regenerate with:
+#   npx cap add ios && npx cap add android && npx @capacitor/assets generate --ios --android
+# Kept out of git: they bloat the repo Railway deploys from and broke its build snapshot.
+ios
+android

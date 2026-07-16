@@ -31,6 +31,27 @@ const MIME: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
+// ---------- CORS for native app origins ----------
+// The web build is same-origin (no CORS involved), but the Capacitor-wrapped
+// iOS/Android apps load from capacitor://localhost / https://localhost and
+// must be allowed to call this API cross-origin.
+
+const ALLOWED_ORIGINS = new Set([
+  "capacitor://localhost",
+  "https://localhost",
+  "http://localhost",
+]);
+
+function setCors(req: IncomingMessage, res: ServerResponse) {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+}
+
 // ---------- basic per-IP rate limiting for the API ----------
 // The device-id metering alone is farmable (clear localStorage → fresh quota),
 // so back it with a coarse per-IP sliding window as a second line of defense.
@@ -91,6 +112,11 @@ const api = chefApi();
 const server = http.createServer((req, res) => {
   const url = req.url ?? "/";
   if (url.startsWith("/api/")) {
+    setCors(req, res);
+    if (req.method === "OPTIONS") {
+      res.statusCode = 204;
+      return res.end();
+    }
     const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0].trim() ?? req.socket.remoteAddress ?? "unknown";
     if (rateLimited(ip)) {
       res.statusCode = 429;

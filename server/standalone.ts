@@ -109,10 +109,10 @@ const server = http.createServer((req, res) => {
 });
 
 if (!fs.existsSync(path.join(DIST, "index.html"))) {
-  console.error("[souschef] dist/index.html not found — run `npm run build` first.");
+  console.error("[cookwithgio] dist/index.html not found — run `npm run build` first.");
   process.exit(1);
 }
 
 server.listen(PORT, () => {
-  console.log(`[souschef] serving dist/ + kitchen API on http://localhost:${PORT}`);
+  console.log(`[cookwithgio] serving dist/ + kitchen API on http://localhost:${PORT}`);
 });

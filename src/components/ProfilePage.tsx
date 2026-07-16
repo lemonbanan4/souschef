@@ -35,8 +35,8 @@ export default function ProfilePage({ game, level, onClose, onShare, onGoalChang
   const todayNutrition = useMemo(() => getTodayNutrition(), []);
   const cookedDates = useMemo(() => loadCookDates(), []);
 
-  const tier = friendshipTier(game.ginoFriendship);
-  const next = nextFriendshipTier(game.ginoFriendship);
+  const tier = friendshipTier(game.gioFriendship);
+  const next = nextFriendshipTier(game.gioFriendship);
   const masteries = useMemo(
     () => Object.entries(loadAllMasteries()).sort((a, b) => b[1] - a[1]),
     // recomputed each time the profile opens — mastery lives outside React state
@@ -126,18 +126,18 @@ export default function ProfilePage({ game, level, onClose, onShare, onGoalChang
         </div>
 
         <div className="profile-section">
-          <h3 className="section-title">🤝 Gino Friendship</h3>
+          <h3 className="section-title">🤝 Gio Friendship</h3>
           <div className="friendship-detail">
-            <div className="gino-friendship-bar profile-friendship-bar">
-              <div className="gino-friendship-fill" style={{ width: `${Math.min(100, (game.ginoFriendship / FRIENDSHIP_MAX) * 100)}%` }} />
+            <div className="gio-friendship-bar profile-friendship-bar">
+              <div className="gio-friendship-fill" style={{ width: `${Math.min(100, (game.gioFriendship / FRIENDSHIP_MAX) * 100)}%` }} />
             </div>
-            <span className="chip-label">{game.ginoFriendship}/{FRIENDSHIP_MAX}</span>
+            <span className="chip-label">{game.gioFriendship}/{FRIENDSHIP_MAX}</span>
           </div>
           <p className="profile-hint">
             {tier.name}
             {next
-              ? ` — ${next.min - game.ginoFriendship} more friendship to unlock ${OUTFIT_LABEL[next.outfit] ?? next.outfit}`
-              : " — max friendship reached! Gino considers you famiglia. 🎉"}
+              ? ` — ${next.min - game.gioFriendship} more friendship to unlock ${OUTFIT_LABEL[next.outfit] ?? next.outfit}`
+              : " — max friendship reached! Gio considers you famiglia. 🎉"}
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export default function ProfilePage({ game, level, onClose, onShare, onGoalChang
           {!goal ? (
             <>
               <p className="profile-hint" style={{ marginTop: 0, marginBottom: 10 }}>
-                Pick a goal and Gino will track your cooked calories against it — and lean recipe suggestions that way too.
+                Pick a goal and Gio will track your cooked calories against it — and lean recipe suggestions that way too.
               </p>
               <div className="goal-type-row">
                 {(Object.keys(GOAL_DEFAULTS) as DietGoalType[]).map((t) => (
@@ -200,7 +200,7 @@ export default function ProfilePage({ game, level, onClose, onShare, onGoalChang
         <div className="profile-section">
           <h3 className="section-title">👅 Taste Profile</h3>
           {verdictCounts.length === 0 ? (
-            <p className="empty-hint">Rate a few dishes after cooking and Gino will learn your palate.</p>
+            <p className="empty-hint">Rate a few dishes after cooking and Gio will learn your palate.</p>
           ) : (
             <div className="chip-row" style={{ marginTop: 0 }}>
               {verdictCounts.map((v) => (

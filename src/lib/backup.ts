@@ -1,4 +1,4 @@
-/** Export/import all SousChef localStorage data as a single JSON file — the only copy lives in the browser otherwise. */
+/** Export/import all Cook with Gio localStorage data as a single JSON file — the only copy lives in the browser otherwise. */
 
 const PREFIX = "souschef.";
 const MAX_VALUE_LENGTH = 2_000_000; // guard against a maliciously huge value blowing up storage/parsing
@@ -14,7 +14,7 @@ export function exportBackup() {
   const a = document.createElement("a");
   const date = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `souschef-backup-${date}.json`;
+  a.download = `cookwithgio-backup-${date}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

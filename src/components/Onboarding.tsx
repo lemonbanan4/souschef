@@ -24,7 +24,7 @@ interface Step {
 const STEPS: Step[] = [
   {
     emoji: "👨‍🍳",
-    title: "Ciao! I'm Chef Gino",
+    title: "Ciao! I'm Chef Gio",
     text: "Tell me what you're craving — or what's in your pantry — and I'll invent a recipe just for you. No idea? Brave a 🎲 Mystery Basket!",
   },
   {

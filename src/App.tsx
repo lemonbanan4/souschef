@@ -60,7 +60,7 @@ import ChefChat from "./components/ChefChat";
 import MealPlanner from "./components/MealPlanner";
 import Passport from "./components/Passport";
 import ShoppingShelf from "./components/ShoppingShelf";
-import ChefGino, { ginoLine, type GinoCategory, type GinoMessage, type GinoMood } from "./components/ChefGino";
+import ChefGio, { gioLine, type GioCategory, type GioMessage, type GioMood } from "./components/ChefGio";
 import LevelUpOverlay from "./components/LevelUpOverlay";
 import ShareModal from "./components/ShareModal";
 import ProfilePage from "./components/ProfilePage";
@@ -126,7 +126,7 @@ function cuisineGradient(cuisine: string): string {
 }
 
 let toastId = 0;
-let ginoMsgId = 0;
+let gioMsgId = 0;
 
 export default function App() {
   const [game, setGame] = useState<GameState>(() => loadGame());
@@ -163,8 +163,8 @@ export default function App() {
   const [quota, setQuota] = useState<KitchenQuota | null>(null);
   const [levelUpShown, setLevelUpShown] = useState<number | null>(null);
   const [showShare, setShowShare] = useState(false);
-  const [ginoMood, setGinoMood] = useState<GinoMood>("happy");
-  const [ginoMsg, setGinoMsg] = useState<GinoMessage | null>(null);
+  const [gioMood, setGioMood] = useState<GioMood>("happy");
+  const [gioMsg, setGioMsg] = useState<GioMessage | null>(null);
   const [burstEmojis, setBurstEmojis] = useState<{ id: number; left: number; delay: number; emoji: string }[]>([]);
   const [xpBursts, setXpBursts] = useState<{ id: number; text: string }[]>([]);
   const [badgeCelebration, setBadgeCelebration] = useState<Badge[] | null>(null);
@@ -210,19 +210,19 @@ export default function App() {
     return game.lastCookDate === localDateKey(yesterday);
   }, [game.streak, game.lastCookDate]);
 
-  const ginoSay = useCallback((mood: GinoMood, categoryOrText: GinoCategory | { text: string }, sticky = false) => {
-    const text = typeof categoryOrText === "object" ? categoryOrText.text : ginoLine(categoryOrText);
-    setGinoMood(mood);
-    setGinoMsg({ text, id: ++ginoMsgId });
+  const gioSay = useCallback((mood: GioMood, categoryOrText: GioCategory | { text: string }, sticky = false) => {
+    const text = typeof categoryOrText === "object" ? categoryOrText.text : gioLine(categoryOrText);
+    setGioMood(mood);
+    setGioMsg({ text, id: ++gioMsgId });
     if (moodTimer.current !== null) window.clearTimeout(moodTimer.current);
     if (!sticky) {
-      moodTimer.current = window.setTimeout(() => setGinoMood("happy"), 6000);
+      moodTimer.current = window.setTimeout(() => setGioMood("happy"), 6000);
     }
   }, []);
 
   // Greeting + kitchen quota + leaderboard availability on mount
   useEffect(() => {
-    ginoSay("happy", "greeting");
+    gioSay("happy", "greeting");
     void fetchKitchenQuota().then(setQuota);
     void leaderboardAvailable().then(setHasLeaderboard);
     // Retroactive secret unlocks — existing saves may already meet conditions
@@ -232,7 +232,7 @@ export default function App() {
       setSecretsTick((t) => t + 1);
       setTimeout(() => setSecretUnlocks(retro), 1500);
     }
-  }, [ginoSay]);
+  }, [gioSay]);
 
   useEffect(() => {
     if (!loading) return;
@@ -263,11 +263,11 @@ export default function App() {
       if (newBadges.length === 0) return;
       setTimeout(() => {
         chime();
-        ginoSay("excited", "badge");
+        gioSay("excited", "badge");
         setBadgeCelebration((prev) => [...(prev ?? []), ...newBadges]);
       }, startDelay);
     },
-    [ginoSay],
+    [gioSay],
   );
 
   /** Floating "+N XP" text that drifts up from the bottom of the screen. */
@@ -321,16 +321,16 @@ export default function App() {
     setServingsWanted(null);
     setDoneSteps(new Set());
     sizzle();
-    ginoSay("cooking", "cooking", true);
+    gioSay("cooking", "cooking", true);
     try {
       const { recipe: r, source } = await generateRecipe({ mode, query: q, diet, maxMinutes, goalHint: goalPromptHint(dietGoal) });
       setRecipe(r);
       setRecipeSource(source);
-      ginoSay("happy", "served");
+      gioSay("happy", "served");
       if (mode === "pantry" && !opts?.mystery) setGame((g) => registerPantryGen(g));
       requestAnimationFrame(() => recipeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch (e) {
-      ginoSay("happy", "error");
+      gioSay("happy", "error");
       pushToast(e instanceof ChefError ? e.message : "Something went wrong. Try again!", true);
     } finally {
       setLoading(false);
@@ -379,8 +379,8 @@ export default function App() {
       eventJustEarned = true;
     }
 
-    // Gino friendship grows with every dish cooked
-    const friendshipBump = bumpCounter(working, "ginoFriendship", 5);
+    // Gio friendship grows with every dish cooked
+    const friendshipBump = bumpCounter(working, "gioFriendship", 5);
     working = friendshipBump.state;
     badgesEarned.push(...friendshipBump.newBadges);
 
@@ -403,13 +403,13 @@ export default function App() {
     setGame(working);
     setCookedThis(true);
 
-    // Gino's secret recipe box — did this cook cross an unlock milestone?
+    // Gio's secret recipe box — did this cook cross an unlock milestone?
     const freshSecrets = checkSecretUnlocks(working);
     if (freshSecrets.length > 0) {
       setSecretsTick((t) => t + 1);
       setTimeout(() => {
         chime();
-        ginoSay("excited", { text: "Psst… come here. This one is from MY recipe box. 🤫" });
+        gioSay("excited", { text: "Psst… come here. This one is from MY recipe box. 🤫" });
         setSecretUnlocks(freshSecrets);
       }, 2000);
     }
@@ -424,10 +424,10 @@ export default function App() {
       markQuestDone();
       setQuestDone(true);
       fanfare();
-      ginoSay("proud", "quest");
+      gioSay("proud", "quest");
       pushToast(`🎯 Quest complete! ${QUEST_MULTIPLIER}× XP: +${cookResult.gainedXp} 🎉`);
     } else {
-      ginoSay("proud", "cooked");
+      gioSay("proud", "cooked");
       pushToast(`+${cookResult.gainedXp} XP — deliciously done! 🎉`);
     }
     // Bonus XP messages (mastery, mystery basket) — one combined toast instead of stacking separately
@@ -458,7 +458,7 @@ export default function App() {
     if (afterLevel > beforeLevel) {
       fanfare();
       setLevelUpShown(working.xp);
-      ginoSay("excited", "levelup");
+      gioSay("excited", "levelup");
     }
     // Badges get their own later slot so they don't collide with the toasts above
     celebrateBadges(badgesEarned, 2100);
@@ -544,7 +544,7 @@ export default function App() {
     setApiKey(keyDraft);
     setSoundOn(soundDraft);
     setShowSettings(false);
-    pushToast(keyDraft.trim() ? "Personal AI chef unlocked! 🤖👨‍🍳" : kitchenConfigured ? "Using the SousChef kitchen ☁️" : "Demo mode active — using the house cookbook.");
+    pushToast(keyDraft.trim() ? "Personal AI chef unlocked! 🤖👨‍🍳" : kitchenConfigured ? "Using Gio's kitchen ☁️" : "Demo mode active — using the house cookbook.");
   }
 
   function handleImportFile(e: ChangeEvent<HTMLInputElement>) {
@@ -558,7 +558,7 @@ export default function App() {
         pushToast("Backup restored! Reloading… 📂");
         setTimeout(() => window.location.reload(), 900);
       } else {
-        pushToast("That doesn't look like a SousChef backup file.", true);
+        pushToast("That doesn't look like a Cook with Gio backup file.", true);
       }
     };
     reader.readAsText(file);
@@ -605,20 +605,20 @@ export default function App() {
     e.target.value = "";
     if (!file) return;
     setFridgeScanning(true);
-    ginoSay("cooking", { text: "Ooh, let Gino peek in your fridge… 👀" }, true);
+    gioSay("cooking", { text: "Ooh, let Gio peek in your fridge… 👀" }, true);
     try {
       const { base64, mediaType } = await resizeImageFile(file);
       const { ingredients, source } = await identifyIngredientsFromPhoto(base64, mediaType);
       if (ingredients.length === 0) {
         pushToast("Couldn't spot any ingredients in that photo — try a clearer shot!", true);
-        ginoSay("happy", "error");
+        gioSay("happy", "error");
       } else {
         setQuery(ingredients.join(", "));
         pushToast(`Found ${ingredients.length} ingredients in your fridge! 📸${source === "demo" ? " (demo)" : ""}`);
-        ginoSay("excited", { text: "I spy dinner ingredients! Let's cook! 👀🍅" });
+        gioSay("excited", { text: "I spy dinner ingredients! Let's cook! 👀🍅" });
       }
     } catch (err) {
-      ginoSay("happy", "error");
+      gioSay("happy", "error");
       pushToast(err instanceof ChefError ? err.message : "Couldn't read that photo. Try again!", true);
     } finally {
       setFridgeScanning(false);
@@ -629,7 +629,7 @@ export default function App() {
   function drawBasket() {
     setMysteryBasket(drawMysteryBasket());
     pop();
-    ginoSay("excited", { text: "Ecco your Mystery Basket! Cook something magnifico! 🎲" });
+    gioSay("excited", { text: "Ecco your Mystery Basket! Cook something magnifico! 🎲" });
   }
 
   function cookMysteryBasket() {
@@ -673,19 +673,19 @@ export default function App() {
   // ----- Meal plan -----
   async function handlePlanWeek() {
     setPlanLoading(true);
-    ginoSay("cooking", { text: "Una settimana di cene... let Gino think! 🗓️" }, true);
+    gioSay("cooking", { text: "Una settimana di cene... let Gio think! 🗓️" }, true);
     try {
       const { plan: p, source } = await generateMealPlan({ pantry, diet, note: goalPromptHint(dietGoal) });
       setPlan(p);
       setPlanDemo(source === "demo");
       safeSet(PLAN_KEY, JSON.stringify(p));
       chime();
-      ginoSay("proud", { text: "Ecco! Five dinners, one shopping trip. Perfetto! 🗓️" });
+      gioSay("proud", { text: "Ecco! Five dinners, one shopping trip. Perfetto! 🗓️" });
       const { state, newBadges } = bumpCounter(game, "plansMade");
       setGame(state);
       celebrateBadges(newBadges);
     } catch (e) {
-      ginoSay("happy", "error");
+      gioSay("happy", "error");
       pushToast(e instanceof ChefError ? e.message : "Planning failed. Try again!", true);
     } finally {
       setPlanLoading(false);
@@ -728,7 +728,7 @@ export default function App() {
       <header className="header clay">
         <div className="logo">
           <div className="logo-pan">🍳</div>
-          SousChef
+          Cook with Gio
         </div>
         <div className="hud">
           <div className="hud-chip" title="Cooking streak">🔥 {game.streak} day{game.streak === 1 ? "" : "s"}</div>
@@ -830,8 +830,8 @@ export default function App() {
           <div className="mystery-box clay-pressed">
             {!mysteryBasket ? (
               <>
-                <p className="mystery-pitch">Gino draws 3 surprise ingredients — cook something great with them for a +50 XP bonus!</p>
-                <button className="cook-btn" onClick={drawBasket}>🎲 Draw Gino's Basket</button>
+                <p className="mystery-pitch">Gio draws 3 surprise ingredients — cook something great with them for a +50 XP bonus!</p>
+                <button className="cook-btn" onClick={drawBasket}>🎲 Draw Gio's Basket</button>
               </>
             ) : (
               <>
@@ -908,7 +908,7 @@ export default function App() {
         )}
         {!personalKey && kitchenConfigured && quota && (
           <div className="demo-note">
-            ☁️ SousChef kitchen · {quota.tier === "pro" ? "Pro" : "Free"} tier ·{" "}
+            ☁️ Gio's kitchen · {quota.tier === "pro" ? "Pro" : "Free"} tier ·{" "}
             {Math.max(0, quota.limits.recipe - quota.usage.recipe)} recipes left this month
             {quota.tier === "free" && <> · <button onClick={openSettings}>Upgrade</button></>}
           </div>
@@ -1134,16 +1134,16 @@ export default function App() {
         </section>
       )}
 
-      {/* Gino's secret recipe box */}
+      {/* Gio's secret recipe box */}
       <section className="shelf clay">
         <h3 className="section-title">
-          🤫 Gino's Secret Recipe Box{" "}
+          🤫 Gio's Secret Recipe Box{" "}
           <span style={{ fontSize: 13, color: "var(--ink-soft)", fontWeight: 700 }}>
             {unlockedSecretIds.size} / {SECRET_RECIPES.length} unlocked
           </span>
         </h3>
         <p className="secret-hint">
-          Family recipes Gino shares only with cooks who've earned them. Keep cooking to unlock the rest.
+          Family recipes Gio shares only with cooks who've earned them. Keep cooking to unlock the rest.
         </p>
         <div className="saved-grid">
           {SECRET_RECIPES.map((s) => {
@@ -1210,13 +1210,13 @@ export default function App() {
         </div>
       </section>
 
-      {/* Chef Gino 🇮🇹 */}
-      <ChefGino
-        mood={ginoMood}
-        message={ginoMsg}
-        friendship={game.ginoFriendship}
+      {/* Chef Gio 🇮🇹 */}
+      <ChefGio
+        mood={gioMood}
+        message={gioMsg}
+        friendship={game.gioFriendship}
         activeEventId={activeEvent?.id ?? null}
-        onPoke={() => ginoSay("happy", "tips")}
+        onPoke={() => gioSay("happy", "tips")}
       />
 
       {/* Cook mode overlay */}
@@ -1278,7 +1278,7 @@ export default function App() {
             {quota?.configured && (
               <div className="quota-box clay-pressed">
                 <div className="quota-head">
-                  ☁️ SousChef kitchen — <strong>{quota.tier === "pro" ? "Pro ✨" : "Free tier"}</strong>
+                  ☁️ Gio's kitchen — <strong>{quota.tier === "pro" ? "Pro ✨" : "Free tier"}</strong>
                 </div>
                 {(["recipe", "chat", "plan", "vision"] as const).map((scope) => (
                   <div key={scope} className="quota-row">
@@ -1403,7 +1403,7 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <button className="cook-btn" onClick={() => setBadgeCelebration(null)}>Grazie, Gino! 🎉</button>
+            <button className="cook-btn" onClick={() => setBadgeCelebration(null)}>Grazie, Gio! 🎉</button>
           </div>
         </div>
       )}
@@ -1413,7 +1413,7 @@ export default function App() {
         <div className="modal-overlay" onClick={() => setSecretUnlocks(null)}>
           <div className="badge-celebration secret-celebration clay" onClick={(e) => e.stopPropagation()}>
             <div className="badge-celebration-kicker">Secret recipe unlocked!</div>
-            <div className="secret-celebration-gino">🤫</div>
+            <div className="secret-celebration-gio">🤫</div>
             <p className="secret-celebration-line">
               "Ascolta… I don't show this to just anybody. You earned it, amico."
             </p>

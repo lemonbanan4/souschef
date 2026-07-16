@@ -1,4 +1,4 @@
-/** Mystery Basket — Chopped-style: Gino draws 3 surprise ingredients, you cook with them. */
+/** Mystery Basket — Chopped-style: Gio draws 3 surprise ingredients, you cook with them. */
 
 const PROTEINS = [
   "chicken thighs",

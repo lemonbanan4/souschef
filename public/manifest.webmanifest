@@ -1,7 +1,7 @@
 {
-  "name": "SousChef",
-  "short_name": "SousChef",
-  "description": "An AI-powered cooking sidekick hosted by Chef Gino.",
+  "name": "Cook with Gio",
+  "short_name": "Gio",
+  "description": "An AI-powered cooking sidekick hosted by Chef Gio.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fffaf0",

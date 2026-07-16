@@ -59,7 +59,7 @@ export interface GameState {
   earlyCooks: number;
   masteredDishes: number;
   mysteryBaskets: number;
-  ginoFriendship: number;
+  gioFriendship: number;
   eventBadges: string[];
   goalHitDays: number;
 }
@@ -70,7 +70,7 @@ export type CounterKey =
   | "itemsChecked"
   | "masteredDishes"
   | "mysteryBaskets"
-  | "ginoFriendship"
+  | "gioFriendship"
   | "goalHitDays";
 
 export interface KitchenQuota {

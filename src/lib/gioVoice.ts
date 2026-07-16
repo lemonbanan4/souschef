@@ -1,7 +1,7 @@
 import { soundOn } from "./sfx";
 
 /**
- * Chef Gino's catchphrases get spoken aloud in Italian via the browser's
+ * Chef Gio's catchphrases get spoken aloud in Italian via the browser's
  * speech synthesis — the same free, built-in tech Cook Mode uses to read
  * steps. Only the short Italian exclamation is voiced, never the full
  * (mostly English) dialog line.
@@ -21,7 +21,7 @@ const CATCHPHRASES = [
   "Missione compiuta",
 ];
 
-/** Find the first catchphrase present in a Gino dialog line, if any. */
+/** Find the first catchphrase present in a Gio dialog line, if any. */
 export function extractCatchphrase(line: string): string | null {
   const lower = line.toLowerCase();
   for (const phrase of CATCHPHRASES) {

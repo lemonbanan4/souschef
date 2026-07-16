@@ -670,7 +670,7 @@ input, textarea, select {
 
 .badge-celebration-emoji {
   font-size: 54px;
-  animation: ginoBob 1.8s ease-in-out infinite;
+  animation: gioBob 1.8s ease-in-out infinite;
 }
 
 .badge-celebration-name {
@@ -718,10 +718,10 @@ input, textarea, select {
 
 .secret-celebration { max-width: 440px; }
 
-.secret-celebration-gino {
+.secret-celebration-gio {
   font-size: 56px;
   margin-top: 10px;
-  animation: ginoBob 1.8s ease-in-out infinite;
+  animation: gioBob 1.8s ease-in-out infinite;
 }
 
 .secret-celebration-line {
@@ -750,7 +750,7 @@ input, textarea, select {
   text-align: center;
 }
 
-.onboarding-emoji { font-size: 60px; animation: ginoBob 2.2s ease-in-out infinite; }
+.onboarding-emoji { font-size: 60px; animation: gioBob 2.2s ease-in-out infinite; }
 .onboarding-card h2 { margin: 8px 0 6px; }
 .onboarding-text { font-weight: 700; color: var(--ink-soft); font-size: 15px; line-height: 1.55; }
 
@@ -1457,9 +1457,9 @@ input, textarea, select {
 
 .cal-cell.today { box-shadow: inset 0 0 0 2px var(--ink); }
 
-/* ---------- Chef Gino ---------- */
+/* ---------- Chef Gio ---------- */
 
-.gino-dock {
+.gio-dock {
   position: fixed;
   left: 18px;
   bottom: 14px;
@@ -1471,18 +1471,18 @@ input, textarea, select {
   pointer-events: none;
 }
 
-.gino-dock > * { pointer-events: auto; }
+.gio-dock > * { pointer-events: auto; }
 
-.gino {
+.gio {
   position: relative;
   background: none;
   padding: 0;
   filter: drop-shadow(0 14px 18px rgba(180, 130, 20, 0.3));
-  animation: ginoBob 3.2s ease-in-out infinite;
+  animation: gioBob 3.2s ease-in-out infinite;
   transition: opacity 0.25s ease;
 }
 
-.gino svg {
+.gio svg {
   transition: width 0.25s ease, height 0.25s ease;
 }
 
@@ -1490,61 +1490,61 @@ input, textarea, select {
    visual transform, which wouldn't shrink the clickable hit-area — so he
    can't intercept taps meant for content underneath. Pops back to full size
    the moment he has something to say. */
-.gino-dock.gino-idle .gino { opacity: 0.82; }
-.gino-dock.gino-idle .gino svg { width: 74px; height: 86px; }
+.gio-dock.gio-idle .gio { opacity: 0.82; }
+.gio-dock.gio-idle .gio svg { width: 74px; height: 86px; }
 
 @media (max-width: 700px) {
-  .gino-dock.gino-idle .gino svg { width: 44px; height: 51px; }
+  .gio-dock.gio-idle .gio svg { width: 44px; height: 51px; }
 }
 
-.gino:hover { transform: scale(1.05) rotate(-2deg); }
-.gino:active { transform: scale(0.96); }
+.gio:hover { transform: scale(1.05) rotate(-2deg); }
+.gio:active { transform: scale(0.96); }
 
-@keyframes ginoBob {
+@keyframes gioBob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
 }
 
-.gino-mustache { transform-origin: 100px 112px; }
-.gino-excited .gino-mustache { animation: mustacheWiggle 0.5s ease-in-out infinite; }
+.gio-mustache { transform-origin: 100px 112px; }
+.gio-excited .gio-mustache { animation: mustacheWiggle 0.5s ease-in-out infinite; }
 
 @keyframes mustacheWiggle {
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(3deg); }
 }
 
-.gino-spoon { transform-origin: 30px 147px; }
-.gino-cooking .gino-spoon { animation: spoonStir 1.1s ease-in-out infinite; }
+.gio-spoon { transform-origin: 30px 147px; }
+.gio-cooking .gio-spoon { animation: spoonStir 1.1s ease-in-out infinite; }
 
 @keyframes spoonStir {
   0%, 100% { transform: rotate(-14deg); }
   50% { transform: rotate(16deg); }
 }
 
-.gino-hat { transform-origin: 100px 40px; }
-.gino-excited .gino-hat { animation: hatHop 0.55s ease-in-out infinite; }
+.gio-hat { transform-origin: 100px 40px; }
+.gio-excited .gio-hat { animation: hatHop 0.55s ease-in-out infinite; }
 
 @keyframes hatHop {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-4px) rotate(2deg); }
 }
 
-.gino-spark {
+.gio-spark {
   position: absolute;
   font-size: 20px;
   animation: sparkFloat 1.6s ease-in-out infinite;
 }
 
-.gino-spark.s1 { top: -6px; left: 4px; animation-delay: 0s; }
-.gino-spark.s2 { top: 10px; right: -4px; animation-delay: 0.5s; }
-.gino-spark.s3 { top: -14px; right: 26px; animation-delay: 1s; }
+.gio-spark.s1 { top: -6px; left: 4px; animation-delay: 0s; }
+.gio-spark.s2 { top: 10px; right: -4px; animation-delay: 0.5s; }
+.gio-spark.s3 { top: -14px; right: 26px; animation-delay: 1s; }
 
 @keyframes sparkFloat {
   0%, 100% { opacity: 0.3; transform: translateY(0) scale(0.85); }
   50% { opacity: 1; transform: translateY(-7px) scale(1.15); }
 }
 
-.gino-steam {
+.gio-steam {
   position: absolute;
   left: 6px;
   color: #bcac83;
@@ -1553,8 +1553,8 @@ input, textarea, select {
   animation: steamRise 1.6s ease-out infinite;
 }
 
-.gino-steam.st1 { top: 36px; animation-delay: 0s; }
-.gino-steam.st2 { top: 44px; left: 20px; animation-delay: 0.8s; }
+.gio-steam.st1 { top: 36px; animation-delay: 0s; }
+.gio-steam.st2 { top: 44px; left: 20px; animation-delay: 0.8s; }
 
 @keyframes steamRise {
   0% { opacity: 0; transform: translateY(6px) rotate(90deg); }
@@ -1562,7 +1562,7 @@ input, textarea, select {
   100% { opacity: 0; transform: translateY(-22px) rotate(90deg); }
 }
 
-.gino-bubble {
+.gio-bubble {
   max-width: 250px;
   padding: 13px 17px;
   border-radius: 20px;
@@ -1581,9 +1581,9 @@ input, textarea, select {
 }
 
 @media (max-width: 700px) {
-  .gino svg { width: 66px; height: 76px; }
-  .gino-bubble { max-width: 170px; font-size: 12px; }
-  /* clear Gino's fixed dock (avatar + friendship bar) so it never covers the last content on scroll */
+  .gio svg { width: 66px; height: 76px; }
+  .gio-bubble { max-width: 170px; font-size: 12px; }
+  /* clear Gio's fixed dock (avatar + friendship bar) so it never covers the last content on scroll */
   #root { padding-bottom: 160px; }
 }
 
@@ -1612,7 +1612,7 @@ input, textarea, select {
   to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-.levelup-burst { font-size: 52px; animation: ginoBob 1.6s ease-in-out infinite; }
+.levelup-burst { font-size: 52px; animation: gioBob 1.6s ease-in-out infinite; }
 
 .levelup-kicker {
   font-family: "Baloo 2", sans-serif;
@@ -1796,16 +1796,16 @@ input, textarea, select {
   box-shadow: inset 3px 3px 7px rgba(206, 160, 34, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
 }
 
-/* ---------- Gino friendship meter ---------- */
+/* ---------- Gio friendship meter ---------- */
 
-.gino-friendship {
+.gio-friendship {
   width: 108px;
   margin-left: 12px;
   /* purely decorative — never steal a tap from whatever's underneath */
   pointer-events: none;
 }
 
-.gino-friendship-bar {
+.gio-friendship-bar {
   height: 8px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.6);
@@ -1813,7 +1813,7 @@ input, textarea, select {
   overflow: hidden;
 }
 
-.gino-friendship-fill {
+.gio-friendship-fill {
   height: 100%;
   border-radius: 6px;
   background: linear-gradient(90deg, #ff9a8b, #ff6a88);
@@ -1821,7 +1821,7 @@ input, textarea, select {
 }
 
 @media (max-width: 700px) {
-  .gino-friendship { width: 84px; margin-left: 8px; }
+  .gio-friendship { width: 84px; margin-left: 8px; }
 }
 
 /* ---------- Profile page ---------- */
@@ -1995,9 +1995,9 @@ input, textarea, select {
   .profile-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ---------- Gino seasonal accessory ---------- */
+/* ---------- Gio seasonal accessory ---------- */
 
-.gino-event-accessory {
+.gio-event-accessory {
   animation: eventBounce 1.8s ease-in-out infinite;
   transform-origin: 152px 45px;
 }

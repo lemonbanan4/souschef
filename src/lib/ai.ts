@@ -74,6 +74,9 @@ function toChefError(error: unknown): ChefError {
     return new ChefError("Couldn't reach the kitchen — check your connection and retry.");
   }
   if (error instanceof Anthropic.APIError) {
+    if (error.status === 529) {
+      return new ChefError("The kitchen is slammed right now (API overloaded). Give it a minute and retry.");
+    }
     return new ChefError(`Kitchen mishap (${error.status}): ${error.message}`);
   }
   return new ChefError("Something unexpected burned. Please try again.");
@@ -166,7 +169,7 @@ export async function generateRecipe(req: RecipeRequest): Promise<{ recipe: Reci
     try {
       const response = await directClient().messages.create({
         model: MODELS.recipe,
-        max_tokens: 6000,
+        max_tokens: 16000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: RECIPE_SCHEMA as unknown as Record<string, unknown> },
@@ -234,7 +237,7 @@ export async function generateMealPlan(opts: {
     try {
       const response = await directClient().messages.create({
         model: MODELS.plan,
-        max_tokens: 4000,
+        max_tokens: 16000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: PLAN_SCHEMA as unknown as Record<string, unknown> },
@@ -271,7 +274,7 @@ export async function identifyIngredientsFromPhoto(
     try {
       const response = await directClient().messages.create({
         model: MODELS.vision,
-        max_tokens: 800,
+        max_tokens: 4000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: INGREDIENTS_SCHEMA as unknown as Record<string, unknown> },

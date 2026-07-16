@@ -1,4 +1,4 @@
-package com.souschef.app;
+package com.cookwithgio.app;
 
 import com.getcapacitor.BridgeActivity;
 

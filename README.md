@@ -1,7 +1,7 @@
-# 🍳 SousChef
+# 🍳 Cook with Gio
 
 A playful, AI-powered cooking companion with a white & yellow claymorphism UI —
-hosted by **Chef Gino** 🇮🇹, the resident clay mascot. Ask for any recipe, or tell
+hosted by **Chef Gio** 🇮🇹, the resident clay mascot. Ask for any recipe, or tell
 it what's in your pantry — then earn XP, streaks and badges for actually cooking.
 
 ## Features
@@ -9,7 +9,7 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
 - **AI chef with smart model routing** — recipes and weekly plans are generated
   by `claude-sonnet-5` (creative quality), mid-recipe chat by `claude-haiku-4-5`
   (fast + 5× cheaper). Structured outputs guarantee clean, typed recipe JSON.
-- **Chef Gino** — a hand-built claymorphic SVG mascot with moods (happy,
+- **Chef Gio** — a hand-built claymorphic SVG mascot with moods (happy,
   cooking, excited, proud), a stirring spoon, a wobbling mustache, and
   Italian-accented dialog for every event. Click him for tips. His catchphrases
   ("Perfetto!", "Delizioso!") are spoken aloud in Italian via the browser's
@@ -18,7 +18,7 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
   full legend status (sparkles included) at 150.
 - **Three modes** — *"I'm craving…"* (free-text), *"My pantry has…"*
   (ingredient-based, with a **📸 fridge photo scan** that reads your fridge
-  contents via Claude vision), and **🎲 Mystery Basket** (Gino draws 3 surprise
+  contents via Claude vision), and **🎲 Mystery Basket** (Gio draws 3 surprise
   ingredients — Chopped-style — for a +50 XP bonus).
 - **Demo mode** — works out of the box with a built-in house cookbook when no
   API key is configured, including a canned fridge-photo response.
@@ -42,14 +42,14 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
 - **Taste profile** — rate cooked dishes (😍/🌶️/🧂/🍬/😐); the chef quietly
   personalizes future recipes to your palate.
 - **Profile page** — a dedicated 👤 view: editable chef name, lifetime stats,
-  Gino friendship progress, taste palate breakdown, and a recipe mastery list —
+  Gio friendship progress, taste palate breakdown, and a recipe mastery list —
   with a shortcut to the share card.
 - **Gamification** — XP per cooked recipe (harder = more), daily streaks with
   bonus XP and earnable streak freezes 🧊, a daily quest worth 2× XP, seasonal
   events with limited-time badges (e.g. Summer Grilling Fest in July), 12 chef
   levels (Dish Washer → Cosmic Cuoco) with a full-screen level-up celebration,
   20 core badges + 4 seasonal badges, and a cuisine passport with stamps.
-- **Diet goals** — pick Cut, Maintain, or Bulk from the profile page and Gino
+- **Diet goals** — pick Cut, Maintain, or Bulk from the profile page and Gio
   tracks your cooked calories/protein against it (one serving per dish,
   ±15% band = goal hit for the day), feeds a natural-language hint into recipe
   and meal-plan generation so suggestions lean the right way, and shows a
@@ -72,26 +72,26 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
 - **Dark mode** — a full claymorphism dark palette (Settings → Theme), with
   Light/Dark/Auto options; Auto follows the OS preference live and an inline
   boot-time script applies the right theme before first paint (no flash).
-- **Installable PWA** — a hand-drawn Chef Gino app icon (`public/gino-icon.svg`,
+- **Installable PWA** — a hand-drawn Chef Gio app icon (`public/gio-icon.svg`,
   rasterized to favicon/apple-touch-icon/192/512 PNGs), a web manifest, and
-  theme-color meta tags so "Add to Home Screen" gets a real Gino icon.
+  theme-color meta tags so "Add to Home Screen" gets a real Gio icon.
 - **Backup & restore** — since everything lives in `localStorage`, Settings
-  has an export button (downloads a dated `souschef-backup-*.json`) and an
+  has an export button (downloads a dated `cookwithgio-backup-*.json`) and an
   import button to restore it — a safety net before clearing site data or
   switching devices/browsers.
-- **Gino's Secret Recipe Box** — five hidden family recipes that unlock at
+- **Gio's Secret Recipe Box** — five hidden family recipes that unlock at
   gamification milestones (reach Level 3, hold a 3-day streak, stamp 3
-  cuisines, befriend Gino, cook 10 dishes). Locked slots show only their
-  unlock hint; unlocking pops a celebration with Gino's backstory for the
+  cuisines, befriend Gio, cook 10 dishes). Locked slots show only their
+  unlock hint; unlocking pops a celebration with Gio's backstory for the
   dish, and unlocked secrets live permanently in their own shelf.
-- **First-run onboarding** — a 3-step Gino-guided tour for brand-new users
+- **First-run onboarding** — a 3-step Gio-guided tour for brand-new users
   (skippable, shown once).
 - **Offline PWA** — a Workbox service worker precaches the app shell, so the
   installed app opens (in demo mode) with no network at all.
 - **Release polish** — floating "+XP" bursts on every cook, a proper
   badge-unlock celebration overlay, a "your streak is on the line" banner
   when yesterday's streak hasn't been fed today, a once-a-day welcome-back
-  XP bonus, a Gino-branded crash screen (React error boundary), OG/Twitter
+  XP bonus, a Gio-branded crash screen (React error boundary), OG/Twitter
   card tags with a 1200×630 social image, and a privacy note in Settings.
 
 Everything (game state, cookbook, API key) is stored in `localStorage` —

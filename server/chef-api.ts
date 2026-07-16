@@ -17,7 +17,7 @@ import {
 import type { ChatMessage, RecipeRequest } from "../src/types.ts";
 
 /**
- * SousChef kitchen proxy — holds the operator's Anthropic key server-side,
+ * Cook with Gio kitchen proxy — holds the operator's Anthropic key server-side,
  * meters usage per device, and enforces free/pro tier limits.
  *
  * Dev: mounted as Vite middleware (see vite.config.ts) — the same handlers
@@ -228,8 +228,23 @@ function anthropicError(error: unknown): { status: number; body: unknown } {
   }
   if (error instanceof Anthropic.AuthenticationError) return { status: 503, body: { error: "not-configured" } };
   if (error instanceof Anthropic.RateLimitError) return { status: 429, body: { error: "upstream-rate-limit" } };
-  if (error instanceof Anthropic.APIError) return { status: 502, body: { error: "upstream", message: error.message } };
+  if (error instanceof Anthropic.APIError) {
+    // 529 overloaded_error is transient — tell the client to retry, same as a rate limit.
+    // (The SDK already auto-retried twice before this surfaced.)
+    if (error.status === 529) return { status: 429, body: { error: "upstream-rate-limit" } };
+    return { status: 502, body: { error: "upstream", message: error.message } };
+  }
   return { status: 500, body: { error: "internal" } };
+}
+
+/** Parse structured-output JSON defensively — a max_tokens truncation yields invalid JSON. */
+function parseModelJson(response: Anthropic.Message, text: string): { ok: true; data: unknown } | { ok: false } {
+  if (response.stop_reason === "max_tokens") return { ok: false };
+  try {
+    return { ok: true, data: JSON.parse(text) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 // ---------- route handlers ----------
@@ -243,7 +258,9 @@ async function handleRecipe(deviceId: string, body: Record<string, unknown>) {
     try {
       const response = await client.messages.create({
         model: MODELS.recipe,
-        max_tokens: 6000,
+        // Adaptive thinking (on by default) shares this budget with the JSON output —
+        // a low cap risks truncated, unparseable JSON.
+        max_tokens: 16000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: RECIPE_SCHEMA as unknown as Record<string, unknown> },
@@ -254,7 +271,9 @@ async function handleRecipe(deviceId: string, body: Record<string, unknown>) {
       if (response.stop_reason === "refusal") return { status: 422, body: { error: "refused" } };
       const text = extractText(response);
       if (!text) return { status: 502, body: { error: "empty" } };
-      return { status: 200, body: { recipe: JSON.parse(text) } };
+      const parsed = parseModelJson(response, text);
+      if (!parsed.ok) return { status: 502, body: { error: "truncated" } };
+      return { status: 200, body: { recipe: parsed.data } };
     } catch (error) {
       return anthropicError(error);
     }
@@ -299,7 +318,7 @@ async function handlePlan(deviceId: string, body: Record<string, unknown>) {
     try {
       const response = await client.messages.create({
         model: MODELS.plan,
-        max_tokens: 4000,
+        max_tokens: 16000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: PLAN_SCHEMA as unknown as Record<string, unknown> },
@@ -310,7 +329,9 @@ async function handlePlan(deviceId: string, body: Record<string, unknown>) {
       if (response.stop_reason === "refusal") return { status: 422, body: { error: "refused" } };
       const text = extractText(response);
       if (!text) return { status: 502, body: { error: "empty" } };
-      return { status: 200, body: { plan: JSON.parse(text) } };
+      const parsed = parseModelJson(response, text);
+      if (!parsed.ok) return { status: 502, body: { error: "truncated" } };
+      return { status: 200, body: { plan: parsed.data } };
     } catch (error) {
       return anthropicError(error);
     }
@@ -327,7 +348,7 @@ async function handleVision(deviceId: string, body: Record<string, unknown>) {
     try {
       const response = await client.messages.create({
         model: MODELS.vision,
-        max_tokens: 800,
+        max_tokens: 4000,
         output_config: {
           effort: "low",
           format: { type: "json_schema", schema: INGREDIENTS_SCHEMA as unknown as Record<string, unknown> },
@@ -346,7 +367,9 @@ async function handleVision(deviceId: string, body: Record<string, unknown>) {
       if (response.stop_reason === "refusal") return { status: 422, body: { error: "refused" } };
       const text = extractText(response);
       if (!text) return { status: 502, body: { error: "empty" } };
-      return { status: 200, body: JSON.parse(text) };
+      const parsed = parseModelJson(response, text);
+      if (!parsed.ok) return { status: 502, body: { error: "truncated" } };
+      return { status: 200, body: parsed.data as Record<string, unknown> };
     } catch (error) {
       return anthropicError(error);
     }

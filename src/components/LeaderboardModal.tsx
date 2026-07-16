@@ -51,7 +51,7 @@ export default function LeaderboardModal({ game, level, onClose }: Props) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal clay leaderboard-modal" onClick={(e) => e.stopPropagation()}>
         <h2>🥇 Kitchen Leaderboard</h2>
-        <p>Anyone running SousChef on this network shows up here — challenge friends and family! 🏆</p>
+        <p>Anyone running Cook with Gio on this network shows up here — challenge friends and family! 🏆</p>
 
         {!name && (
           <div className="leaderboard-name-prompt">

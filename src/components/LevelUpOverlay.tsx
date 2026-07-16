@@ -18,7 +18,7 @@ export default function LevelUpOverlay({ level, onClose }: Props) {
             ? `Next rank at ${level.nextXp.toLocaleString()} XP — keep cooking!`
             : "You've reached the top of the kitchen. Incredibile!"}
         </p>
-        <button className="cook-btn" onClick={onClose}>Grazie, Gino! 🙌</button>
+        <button className="cook-btn" onClick={onClose}>Grazie, Gio! 🙌</button>
       </div>
     </div>
   );

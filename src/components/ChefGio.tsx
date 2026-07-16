@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { FRIENDSHIP_MAX, friendshipTier } from "../lib/friendship";
-import { extractCatchphrase, speakCatchphrase } from "../lib/ginoVoice";
+import { extractCatchphrase, speakCatchphrase } from "../lib/gioVoice";
 
 /**
- * Chef Gino 🇮🇹 — the app's claymorphic Italian chef mascot.
+ * Chef Gio 🇮🇹 — the app's claymorphic Italian chef mascot.
  * Hand-built SVG with moods, a wobbling mustache, a stirring spoon,
  * cosmetic outfits unlocked by friendship, and a speech bubble.
  */
 
-export type GinoMood = "happy" | "cooking" | "excited" | "proud";
+export type GioMood = "happy" | "cooking" | "excited" | "proud";
 
 export const GINO_LINES = {
   greeting: [
-    "Buongiorno! Chef Gino, at your service! 👨‍🍳",
+    "Buongiorno! Chef Gio, at your service! 👨‍🍳",
     "Ah, benvenuto back in la cucina!",
     "Ciao! Che cuciniamo oggi, eh?",
   ],
@@ -33,7 +33,7 @@ export const GINO_LINES = {
   ],
   levelup: [
     "MAMMA MIA! You leveled up! 🎉",
-    "Incredibile! Soon you take Gino's job, eh?",
+    "Incredibile! Soon you take Gio's job, eh?",
   ],
   badge: [
     "Ooh, a shiny new badge! Fantastico! 🏆",
@@ -46,37 +46,37 @@ export const GINO_LINES = {
   ],
   tips: [
     "Psst… cook every day to keep the streak alive! 🔥",
-    "Save your pantry once — Gino remembers, capisce?",
-    "Rate your dishes! Gino never forgets a palate.",
+    "Save your pantry once — Gio remembers, capisce?",
+    "Rate your dishes! Gio never forgets a palate.",
     "The daily quest pays DOUBLE XP. Just saying…",
     "Cook mode keeps your screen awake. Molto pratico!",
     "Every 7 dishes, you earn a streak freeze. 🧊",
-    "Snap a photo of your fridge — Gino will read the ingredients! 📸",
-    "Try a Mystery Basket for bonus XP. Gino loves a challenge!",
+    "Snap a photo of your fridge — Gio will read the ingredients! 📸",
+    "Try a Mystery Basket for bonus XP. Gio loves a challenge!",
     "Cook the same dish 3 times to master it. 🌟",
-    "The more we cook together, the more Gino dresses up. 😎",
+    "The more we cook together, the more Gio dresses up. 😎",
   ],
   friendshipUp: [
-    "Gino likes you more and more! 🤝",
+    "Gio likes you more and more! 🤝",
     "We are becoming true amici, no?",
   ],
 } as const;
 
-export type GinoCategory = keyof typeof GINO_LINES;
+export type GioCategory = keyof typeof GINO_LINES;
 
-export function ginoLine(category: GinoCategory): string {
+export function gioLine(category: GioCategory): string {
   const lines = GINO_LINES[category];
   return lines[Math.floor(Math.random() * lines.length)];
 }
 
-export interface GinoMessage {
+export interface GioMessage {
   text: string;
   id: number;
 }
 
 interface Props {
-  mood: GinoMood;
-  message: GinoMessage | null;
+  mood: GioMood;
+  message: GioMessage | null;
   friendship: number;
   activeEventId?: string | null;
   onPoke: () => void;
@@ -89,7 +89,7 @@ const EVENT_ACCESSORY: Record<string, string> = {
   "amore-week": "💘",
 };
 
-export default function ChefGino({ mood, message, friendship, activeEventId, onPoke }: Props) {
+export default function ChefGio({ mood, message, friendship, activeEventId, onPoke }: Props) {
   const [visibleLine, setVisibleLine] = useState<string | null>(null);
   const hideTimer = useRef<number | null>(null);
   const tier = friendshipTier(friendship);
@@ -174,29 +174,29 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
   const isLegend = tier.outfit === "legend";
 
   return (
-    <div className={`gino-dock ${visibleLine ? "" : "gino-idle"}`}>
+    <div className={`gio-dock ${visibleLine ? "" : "gio-idle"}`}>
       {visibleLine && (
-        <div className="gino-bubble clay" onClick={() => setVisibleLine(null)}>
+        <div className="gio-bubble clay" onClick={() => setVisibleLine(null)}>
           {visibleLine}
         </div>
       )}
       <button
-        className={`gino gino-${mood}`}
+        className={`gio gio-${mood}`}
         onClick={onPoke}
-        title={`Chef Gino — ${tier.name} (${friendship}/${FRIENDSHIP_MAX} friendship). Click for a tip!`}
-        aria-label="Chef Gino, click for a cooking tip"
+        title={`Chef Gio — ${tier.name} (${friendship}/${FRIENDSHIP_MAX} friendship). Click for a tip!`}
+        aria-label="Chef Gio, click for a cooking tip"
       >
         {mood === "proud" && (
           <>
-            <span className="gino-spark s1">✨</span>
-            <span className="gino-spark s2">✨</span>
-            <span className="gino-spark s3">⭐</span>
+            <span className="gio-spark s1">✨</span>
+            <span className="gio-spark s2">✨</span>
+            <span className="gio-spark s3">⭐</span>
           </>
         )}
         {mood === "cooking" && (
           <>
-            <span className="gino-steam st1">〜</span>
-            <span className="gino-steam st2">〜</span>
+            <span className="gio-steam st1">〜</span>
+            <span className="gio-steam st2">〜</span>
           </>
         )}
         <svg viewBox="0 0 200 230" width="132" height="152" role="img" aria-hidden="true">
@@ -235,7 +235,7 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
 
           {/* friendship outfit: medal pinned to the jacket */}
           {hasMedal && (
-            <g className="gino-medal">
+            <g className="gio-medal">
               <path d="M118 178 L127 195 L109 195 Z" fill="#3f9b4f" opacity="0.9" />
               <path d="M112 178 L121 197 L103 195 Z" fill="#d64545" opacity="0.85" />
               <circle cx="115" cy="200" r="9.5" fill="url(#gBand)" stroke="#b8860b" strokeWidth="1.5" />
@@ -244,10 +244,10 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
           )}
 
           {/* left arm holding spoon (stirs while cooking) */}
-          <g className="gino-arm">
+          <g className="gio-arm">
             <path d="M58 185 Q34 176 30 150" stroke="url(#gJacket)" strokeWidth="17" fill="none" strokeLinecap="round" />
             <circle cx="30" cy="147" r="10" fill="url(#gSkin)" />
-            <g className="gino-spoon">
+            <g className="gio-spoon">
               <rect x="26.5" y="98" width="7" height="52" rx="3.5" fill="#b0793f" />
               <ellipse cx="30" cy="94" rx="11" ry="13" fill="#c98d4e" />
               <ellipse cx="30" cy="92" rx="6.5" ry="8" fill="#a76e35" opacity="0.55" />
@@ -271,7 +271,7 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
 
           {/* friendship outfit: sunglasses (covers the eyes) */}
           {hasShades && (
-            <g className="gino-shades">
+            <g className="gio-shades">
               <rect x="69" y="81" width="27" height="15" rx="7.5" fill="#2b2b2b" />
               <rect x="104" y="81" width="27" height="15" rx="7.5" fill="#2b2b2b" />
               <rect x="96" y="85" width="8" height="4" rx="2" fill="#2b2b2b" />
@@ -285,7 +285,7 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
           <ellipse cx="97" cy="98" rx="3" ry="4" fill="#ffd9b3" opacity="0.7" />
 
           {/* mustache — the pride of the family */}
-          <g className="gino-mustache">
+          <g className="gio-mustache">
             <path d="M100 108 Q80 104 68 111 Q60 116 64 122 Q72 128 84 124 Q95 120 100 112 Z" fill="#6b4a2f" />
             <path d="M100 108 Q120 104 132 111 Q140 116 136 122 Q128 128 116 124 Q105 120 100 112 Z" fill="#6b4a2f" />
             <path d="M100 108 Q84 105 72 111 Q78 114 88 113 Q96 111 100 110 Z" fill="#7d5a3c" opacity="0.8" />
@@ -295,7 +295,7 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
           {mouth}
 
           {/* toque (chef hat) */}
-          <g className="gino-hat">
+          <g className="gio-hat">
             <rect x="66" y="46" width="68" height="18" rx="9" fill="url(#gBand)" />
             <path d="M66 52 Q58 20 82 16 Q88 2 106 6 Q124 0 130 16 Q148 22 134 52 Z" fill="url(#gHat)" />
             <circle cx="80" cy="26" r="13" fill="#fff" />
@@ -309,7 +309,7 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
 
           {/* legend tier: a little extra sparkle around the hat */}
           {isLegend && (
-            <g className="gino-legend-sparkle">
+            <g className="gio-legend-sparkle">
               <text x="142" y="18" fontSize="16">✨</text>
               <text x="44" y="24" fontSize="14">✨</text>
             </g>
@@ -317,17 +317,17 @@ export default function ChefGino({ mood, message, friendship, activeEventId, onP
 
           {/* seasonal event accessory — a small badge for whichever event is live */}
           {eventAccessory && (
-            <text x="152" y="45" fontSize="22" className="gino-event-accessory">{eventAccessory}</text>
+            <text x="152" y="45" fontSize="22" className="gio-event-accessory">{eventAccessory}</text>
           )}
         </svg>
       </button>
       <div
-        className="gino-friendship"
-        title={`Friendship with Gino: ${friendship}/${FRIENDSHIP_MAX} — ${tier.name}`}
+        className="gio-friendship"
+        title={`Friendship with Gio: ${friendship}/${FRIENDSHIP_MAX} — ${tier.name}`}
       >
-        <div className="gino-friendship-bar">
+        <div className="gio-friendship-bar">
           <div
-            className="gino-friendship-fill"
+            className="gio-friendship-fill"
             style={{ width: `${Math.min(100, (friendship / FRIENDSHIP_MAX) * 100)}%` }}
           />
         </div>

@@ -27,7 +27,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         <div className="crash-card clay">
           <div className="crash-emoji">🍝</div>
           <h1>Mamma mia!</h1>
-          <p>Gino dropped the pasta — something went wrong in la cucina.</p>
+          <p>Gio dropped the pasta — something went wrong in la cucina.</p>
           <p className="crash-hint">Your recipes, XP and streaks are safe. A reload should fix it.</p>
           <button className="cook-btn" onClick={() => window.location.reload()}>
             Reload the kitchen 🔄

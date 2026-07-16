@@ -1,11 +1,11 @@
-/** Chef Gino's friendship meter — unlocks cosmetic outfits as it grows. */
+/** Chef Gio's friendship meter — unlocks cosmetic outfits as it grows. */
 
-export type GinoOutfit = "classic" | "shades" | "medal" | "legend";
+export type GioOutfit = "classic" | "shades" | "medal" | "legend";
 
 export interface FriendshipTier {
   min: number;
   name: string;
-  outfit: GinoOutfit;
+  outfit: GioOutfit;
 }
 
 export const FRIENDSHIP_TIERS: FriendshipTier[] = [

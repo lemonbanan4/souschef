@@ -3,7 +3,7 @@ import { levelInfo } from "./game";
 import { safeSet } from "./storage";
 
 /**
- * Gino's Secret Recipe Box — hidden family recipes that unlock at gamification
+ * Gio's Secret Recipe Box — hidden family recipes that unlock at gamification
  * milestones. Locked ones show only their unlock hint, which is the point:
  * a visible reason to come back and cook one more day.
  */
@@ -28,7 +28,7 @@ export const SECRET_RECIPES: SecretRecipe[] = [
       title: "Nonna's Midnight Carbonara",
       emoji: "🤫",
       description:
-        "The carbonara Gino's nonna made after service, when the trattoria was dark. No cream — that would wake her ghost. Just eggs, cheese, guanciale, and courage.",
+        "The carbonara Gio's nonna made after service, when the trattoria was dark. No cream — that would wake her ghost. Just eggs, cheese, guanciale, and courage.",
       cuisine: "Italian",
       difficulty: "medium",
       timeMinutes: 25,
@@ -60,10 +60,10 @@ export const SECRET_RECIPES: SecretRecipe[] = [
     unlocked: (s) => s.streak >= 3,
     recipe: {
       id: "secret-ragu",
-      title: "Gino's Sunday Ragù",
+      title: "Gio's Sunday Ragù",
       emoji: "🤫",
       description:
-        "The ragù that simmered every Sunday of Gino's childhood. This is the weeknight-honest version — one pot, one afternoon, all the amore.",
+        "The ragù that simmered every Sunday of Gio's childhood. This is the weeknight-honest version — one pot, one afternoon, all the amore.",
       cuisine: "Italian",
       difficulty: "hard",
       timeMinutes: 90,
@@ -101,7 +101,7 @@ export const SECRET_RECIPES: SecretRecipe[] = [
       title: "The Passport Paella",
       emoji: "🤫",
       description:
-        "Gino learned this from a rival chef in Valencia — they argued for three days about saffron and have been best friends since. Travel on a plate.",
+        "Gio learned this from a rival chef in Valencia — they argued for three days about saffron and have been best friends since. Travel on a plate.",
       cuisine: "Spanish",
       difficulty: "medium",
       timeMinutes: 50,
@@ -134,14 +134,14 @@ export const SECRET_RECIPES: SecretRecipe[] = [
   },
   {
     id: "secret-tiramisu",
-    unlockLabel: "Reach friendship 30 with Gino",
-    unlocked: (s) => s.ginoFriendship >= 30,
+    unlockLabel: "Reach friendship 30 with Gio",
+    unlocked: (s) => s.gioFriendship >= 30,
     recipe: {
       id: "secret-tiramisu",
       title: "Mustache-Twirl Tiramisù",
       emoji: "🤫",
       description:
-        "Gino only shares this with true amici. It's the tiramisù he made to propose to his wife. She said yes before she finished the first spoonful.",
+        "Gio only shares this with true amici. It's the tiramisù he made to propose to his wife. She said yes before she finished the first spoonful.",
       cuisine: "Italian",
       difficulty: "easy",
       timeMinutes: 30,
@@ -163,7 +163,7 @@ export const SECRET_RECIPES: SecretRecipe[] = [
         "Refrigerate at least 4 hours — overnight is the proposal-grade move.",
         "Dust generously with cocoa right before serving, never before.",
       ],
-      chefTip: "One second per side. A soggy tiramisù has ended friendships. Gino has seen it.",
+      chefTip: "One second per side. A soggy tiramisù has ended friendships. Gio has seen it.",
       tags: ["secret", "dessert", "make-ahead"],
       nutrition: { calories: 480, protein: "9g", carbs: "42g", fat: "30g" },
     },
@@ -177,7 +177,7 @@ export const SECRET_RECIPES: SecretRecipe[] = [
       title: "The Golden Toque Risotto",
       emoji: "🤫",
       description:
-        "The risotto Gino cooked in the final of the Golden Toque championship. He came second. The winner used truffles. Gino has never forgiven truffles.",
+        "The risotto Gio cooked in the final of the Golden Toque championship. He came second. The winner used truffles. Gio has never forgiven truffles.",
       cuisine: "Italian",
       difficulty: "hard",
       timeMinutes: 40,

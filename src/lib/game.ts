@@ -39,7 +39,7 @@ export const BADGES: Badge[] = [
   { id: "rising-star", emoji: "⭐", name: "Rising Star", description: "Reach 1,000 lifetime XP", earned: (s) => s.xp >= 1000 },
   { id: "dish-master", emoji: "🌟", name: "Dish Master", description: "Master a recipe — cook it 3 times", earned: (s) => s.masteredDishes >= 1 },
   { id: "basket-wizard", emoji: "🧺", name: "Basket Wizard", description: "Complete a Mystery Basket challenge", earned: (s) => s.mysteryBaskets >= 1 },
-  { id: "gino-bff", emoji: "🤝", name: "Gino's BFF", description: "Reach max friendship with Chef Gino", earned: (s) => s.ginoFriendship >= FRIENDSHIP_MAX },
+  { id: "gio-bff", emoji: "🤝", name: "Gio's BFF", description: "Reach max friendship with Chef Gio", earned: (s) => s.gioFriendship >= FRIENDSHIP_MAX },
   { id: "on-target", emoji: "🎯", name: "On Target", description: "Hit your daily diet goal", earned: (s) => s.goalHitDays >= 1 },
 ];
 
@@ -61,7 +61,7 @@ export const DEFAULT_STATE: GameState = {
   earlyCooks: 0,
   masteredDishes: 0,
   mysteryBaskets: 0,
-  ginoFriendship: 0,
+  gioFriendship: 0,
   eventBadges: [],
   goalHitDays: 0,
 };
@@ -70,7 +70,15 @@ export function loadGame(): GameState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_STATE };
-    return { ...DEFAULT_STATE, ...(JSON.parse(raw) as GameState) };
+    const parsed = JSON.parse(raw) as GameState & { ginoFriendship?: number };
+    // Migrate saves from before the mascot's Gino → Gio rename
+    if (parsed.ginoFriendship !== undefined && parsed.gioFriendship === undefined) {
+      parsed.gioFriendship = parsed.ginoFriendship;
+    }
+    if (Array.isArray(parsed.badges)) {
+      parsed.badges = parsed.badges.map((b) => (b === "gino-bff" ? "gio-bff" : b));
+    }
+    return { ...DEFAULT_STATE, ...parsed };
   } catch {
     return { ...DEFAULT_STATE };
   }

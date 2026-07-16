@@ -41,8 +41,8 @@ function clayCard(c: CanvasRenderingContext2D, x: number, y: number, w: number, 
   c.restore();
 }
 
-/** Mini canvas Gino — hat, face, mustache, tricolore pin. */
-function drawGino(c: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+/** Mini canvas Gio — hat, face, mustache, tricolore pin. */
+function drawGio(c: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
   // face
   c.fillStyle = "#ffe3c1";
   c.beginPath();
@@ -207,10 +207,10 @@ export function renderChefCard(
 
   if (format === "wide") {
     // horizontal layout
-    drawGino(c, 235, 250, 1.55);
+    drawGio(c, 235, 250, 1.55);
     c.fillStyle = INK;
     c.font = "800 52px 'Baloo 2', 'Nunito', sans-serif";
-    c.fillText("SousChef", 235, 435);
+    c.fillText("Cook with Gio", 235, 435);
     c.fillStyle = INK_SOFT;
     c.font = "800 19px 'Nunito', sans-serif";
     c.fillText(subtitle, 235, 470);
@@ -252,11 +252,11 @@ export function renderChefCard(
   } else {
     const story = format === "story";
     const gy = story ? 330 : 235;
-    drawGino(c, centerX, gy, story ? 2.1 : 1.55);
+    drawGio(c, centerX, gy, story ? 2.1 : 1.55);
 
     c.fillStyle = INK;
     c.font = `800 ${story ? 86 : 68}px 'Baloo 2', 'Nunito', sans-serif`;
-    c.fillText("SousChef", centerX, story ? 580 : 400);
+    c.fillText("Cook with Gio", centerX, story ? 580 : 400);
     c.fillStyle = INK_SOFT;
     c.font = `800 ${story ? 30 : 24}px 'Nunito', sans-serif`;
     c.fillText(subtitle, centerX, story ? 632 : 442);
@@ -322,7 +322,7 @@ export async function shareCard(canvas: HTMLCanvasElement, filename: string): Pr
   if (!navigator.share) return "unsupported";
   const blob = await cardBlob(canvas);
   const file = new File([blob], filename, { type: "image/png" });
-  const payload = { files: [file], title: "My SousChef kitchen card" };
+  const payload = { files: [file], title: "My Cook with Gio kitchen card" };
   if (navigator.canShare && !navigator.canShare(payload)) return "unsupported";
   try {
     await navigator.share(payload);

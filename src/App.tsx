@@ -68,6 +68,7 @@ import LeaderboardModal from "./components/LeaderboardModal";
 import Onboarding, { shouldShowOnboarding } from "./components/Onboarding";
 import { DAILY_BONUS_XP, claimDailyVisit } from "./lib/dailyBonus";
 import { leaderboardAvailable } from "./lib/leaderboard";
+import { SECRET_RECIPES, checkSecretUnlocks, loadUnlockedSecretIds, type SecretRecipe } from "./lib/secretRecipes";
 import { localDateKey } from "./lib/date";
 
 const SAVED_KEY = "souschef.cookbook";
@@ -176,6 +177,8 @@ export default function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding(game.cooked));
   const [hasLeaderboard, setHasLeaderboard] = useState(false);
+  const [secretUnlocks, setSecretUnlocks] = useState<SecretRecipe[] | null>(null);
+  const [secretsTick, setSecretsTick] = useState(0);
   const [goalTick, setGoalTick] = useState(0);
   const recipeRef = useRef<HTMLDivElement>(null);
   const moodTimer = useRef<number | null>(null);
@@ -198,6 +201,7 @@ export default function App() {
   // game.cooked force a recheck whenever ProfilePage edits the goal or a cook logs nutrition
   const dietGoal = useMemo(() => loadDietGoal(), [goalTick]);
   const todayNutrition = useMemo(() => getTodayNutrition(), [goalTick, game.cooked]);
+  const unlockedSecretIds = useMemo(() => loadUnlockedSecretIds(), [secretsTick]);
   // Cooked yesterday but not yet today → the streak dies at midnight
   const streakAtRisk = useMemo(() => {
     if (game.streak < 2 || !game.lastCookDate) return false;
@@ -221,6 +225,13 @@ export default function App() {
     ginoSay("happy", "greeting");
     void fetchKitchenQuota().then(setQuota);
     void leaderboardAvailable().then(setHasLeaderboard);
+    // Retroactive secret unlocks — existing saves may already meet conditions
+    // added later. checkSecretUnlocks persists, so a second run returns [].
+    const retro = checkSecretUnlocks(loadGame());
+    if (retro.length > 0) {
+      setSecretsTick((t) => t + 1);
+      setTimeout(() => setSecretUnlocks(retro), 1500);
+    }
   }, [ginoSay]);
 
   useEffect(() => {
@@ -391,6 +402,18 @@ export default function App() {
 
     setGame(working);
     setCookedThis(true);
+
+    // Gino's secret recipe box — did this cook cross an unlock milestone?
+    const freshSecrets = checkSecretUnlocks(working);
+    if (freshSecrets.length > 0) {
+      setSecretsTick((t) => t + 1);
+      setTimeout(() => {
+        chime();
+        ginoSay("excited", { text: "Psst… come here. This one is from MY recipe box. 🤫" });
+        setSecretUnlocks(freshSecrets);
+      }, 2000);
+    }
+
     fireBurst();
     fireXpBurst(`+${cookResult.gainedXp} XP`);
     if (mastery.justMastered) setTimeout(() => fireXpBurst("+100 XP 🌟"), 700);
@@ -447,6 +470,17 @@ export default function App() {
     setRatedThis(true);
     chime();
     pushToast(verdict === "loved" ? "Noted — the chef will remember! 😍" : "Noted — the chef will adjust next time 👨‍🍳");
+  }
+
+  /** Load any recipe (cookbook, secret box) into the main recipe view. */
+  function openRecipe(r: Recipe) {
+    setRecipe(r);
+    setRecipeSource("ai");
+    setCookedThis(false);
+    setRatedThis(false);
+    setServingsWanted(null);
+    setDoneSteps(new Set());
+    requestAnimationFrame(() => recipeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   function handleSave() {
@@ -1100,6 +1134,44 @@ export default function App() {
         </section>
       )}
 
+      {/* Gino's secret recipe box */}
+      <section className="shelf clay">
+        <h3 className="section-title">
+          🤫 Gino's Secret Recipe Box{" "}
+          <span style={{ fontSize: 13, color: "var(--ink-soft)", fontWeight: 700 }}>
+            {unlockedSecretIds.size} / {SECRET_RECIPES.length} unlocked
+          </span>
+        </h3>
+        <p className="secret-hint">
+          Family recipes Gino shares only with cooks who've earned them. Keep cooking to unlock the rest.
+        </p>
+        <div className="saved-grid">
+          {SECRET_RECIPES.map((s) => {
+            const unlocked = unlockedSecretIds.has(s.id);
+            return unlocked ? (
+              <div
+                key={s.id}
+                className="saved-card secret-card"
+                role="button"
+                tabIndex={0}
+                onClick={() => openRecipe(s.recipe)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openRecipe(s.recipe); } }}
+              >
+                <div className="s-emoji">{s.recipe.emoji}</div>
+                <div className="s-title">{s.recipe.title}</div>
+                <div className="s-meta">{s.recipe.cuisine} · {s.recipe.timeMinutes} min · {s.recipe.difficulty}</div>
+              </div>
+            ) : (
+              <div key={s.id} className="saved-card secret-card locked" aria-label={`Locked secret recipe — ${s.unlockLabel}`}>
+                <div className="s-emoji">🔒</div>
+                <div className="s-title">? ? ?</div>
+                <div className="s-meta secret-unlock-hint">{s.unlockLabel}</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Cuisine passport */}
       <Passport cookedCuisines={game.cuisines} />
 
@@ -1332,6 +1404,32 @@ export default function App() {
               ))}
             </div>
             <button className="cook-btn" onClick={() => setBadgeCelebration(null)}>Grazie, Gino! 🎉</button>
+          </div>
+        </div>
+      )}
+
+      {/* Secret recipe unlocked */}
+      {secretUnlocks && secretUnlocks.length > 0 && (
+        <div className="modal-overlay" onClick={() => setSecretUnlocks(null)}>
+          <div className="badge-celebration secret-celebration clay" onClick={(e) => e.stopPropagation()}>
+            <div className="badge-celebration-kicker">Secret recipe unlocked!</div>
+            <div className="secret-celebration-gino">🤫</div>
+            <p className="secret-celebration-line">
+              "Ascolta… I don't show this to just anybody. You earned it, amico."
+            </p>
+            {secretUnlocks.map((s) => (
+              <div key={s.id} className="secret-celebration-item">
+                <div className="badge-celebration-name">{s.recipe.title}</div>
+                <div className="badge-celebration-desc">{s.recipe.description}</div>
+                <button
+                  className="cook-btn secret-cook-btn"
+                  onClick={() => { setSecretUnlocks(null); openRecipe(s.recipe); }}
+                >
+                  Cook it now 🍳
+                </button>
+              </div>
+            ))}
+            <button className="ghost-btn" onClick={() => setSecretUnlocks(null)}>Save it for later 🤫</button>
           </div>
         </div>
       )}

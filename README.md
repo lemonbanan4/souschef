@@ -79,6 +79,11 @@ it what's in your pantry — then earn XP, streaks and badges for actually cooki
   has an export button (downloads a dated `souschef-backup-*.json`) and an
   import button to restore it — a safety net before clearing site data or
   switching devices/browsers.
+- **Gino's Secret Recipe Box** — five hidden family recipes that unlock at
+  gamification milestones (reach Level 3, hold a 3-day streak, stamp 3
+  cuisines, befriend Gino, cook 10 dishes). Locked slots show only their
+  unlock hint; unlocking pops a celebration with Gino's backstory for the
+  dish, and unlocked secrets live permanently in their own shelf.
 - **First-run onboarding** — a 3-step Gino-guided tour for brand-new users
   (skippable, shown once).
 - **Offline PWA** — a Workbox service worker precaches the app shell, so the

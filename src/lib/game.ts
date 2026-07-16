@@ -1,5 +1,7 @@
 import type { Badge, CounterKey, Difficulty, GameState, LevelInfo, Recipe } from "../types";
 import { FRIENDSHIP_MAX } from "./friendship";
+import { localDateKey } from "./date";
+import { safeSet } from "./storage";
 
 const STORAGE_KEY = "souschef.game";
 
@@ -74,8 +76,8 @@ export function loadGame(): GameState {
   }
 }
 
-export function saveGame(state: GameState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+export function saveGame(state: GameState): boolean {
+  return safeSet(STORAGE_KEY, JSON.stringify(state));
 }
 
 export function xpForRecipe(difficulty: Difficulty, streak: number): number {
@@ -104,7 +106,7 @@ export function levelInfo(xp: number): LevelInfo {
 function dateKey(daysAgo = 0): string {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().slice(0, 10);
+  return localDateKey(d);
 }
 
 function newlyEarnedBadges(before: string[], state: GameState): Badge[] {
@@ -115,7 +117,6 @@ export interface CookResult {
   state: GameState;
   gainedXp: number;
   newBadges: Badge[];
-  leveledUp: boolean;
   /** a streak freeze was consumed to bridge a missed day */
   frozeStreak: boolean;
   /** a new streak freeze was earned this cook */
@@ -176,9 +177,8 @@ export function registerCook(state: GameState, recipe: Recipe, xpMultiplier = 1)
   const newBadges = newlyEarnedBadges(state.badges, next);
   next.badges = [...state.badges, ...newBadges.map((b) => b.id)];
 
-  const leveledUp = levelInfo(next.xp).level > levelInfo(state.xp).level;
   saveGame(next);
-  return { state: next, gainedXp, newBadges, leveledUp, frozeStreak, earnedFreeze };
+  return { state: next, gainedXp, newBadges, frozeStreak, earnedFreeze };
 }
 
 /** Track pantry-mode generations for the Pantry Wizard badge. */

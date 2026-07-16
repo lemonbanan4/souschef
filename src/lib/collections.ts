@@ -1,6 +1,11 @@
-/** User-organized cookbook folders — a recipe title maps to at most one collection name. */
+/** User-organized cookbook folders — a recipe (keyed by id, or title as a legacy fallback) maps to at most one collection name. */
+
+import { safeSet } from "./storage";
 
 const KEY = "souschef.collections";
+
+/** Reserved for the "show everything"/"show unassigned" filter chips — can't double as a real collection name. */
+const RESERVED_NAMES = new Set(["all", "unsorted"]);
 
 interface CollectionsData {
   names: string[];
@@ -18,7 +23,7 @@ function load(): CollectionsData {
 }
 
 function save(data: CollectionsData) {
-  localStorage.setItem(KEY, JSON.stringify(data));
+  safeSet(KEY, JSON.stringify(data));
 }
 
 export function loadCollectionNames(): string[] {
@@ -29,28 +34,37 @@ export function loadAssignments(): Record<string, string> {
   return load().assignments;
 }
 
-export function createCollection(name: string): string[] {
+/** Returns the updated name list, plus whether the name was actually added (rejected: blank, reserved, or a case-insensitive duplicate). */
+export function createCollection(name: string): { names: string[]; created: boolean } {
   const data = load();
   const trimmed = name.trim();
-  if (trimmed && !data.names.includes(trimmed)) {
+  const isReserved = RESERVED_NAMES.has(trimmed.toLowerCase());
+  const isDuplicate = data.names.some((n) => n.toLowerCase() === trimmed.toLowerCase());
+  if (trimmed && !isReserved && !isDuplicate) {
     data.names.push(trimmed);
     save(data);
+    return { names: data.names, created: true };
   }
-  return data.names;
+  return { names: data.names, created: false };
 }
 
 export function deleteCollection(name: string) {
   const data = load();
   data.names = data.names.filter((n) => n !== name);
-  for (const title of Object.keys(data.assignments)) {
-    if (data.assignments[title] === name) delete data.assignments[title];
+  for (const key of Object.keys(data.assignments)) {
+    if (data.assignments[key] === name) delete data.assignments[key];
   }
   save(data);
 }
 
-export function assignRecipeToCollection(title: string, name: string | null) {
+export function assignRecipeToCollection(key: string, name: string | null) {
   const data = load();
-  if (name) data.assignments[title] = name;
-  else delete data.assignments[title];
+  if (name) data.assignments[key] = name;
+  else delete data.assignments[key];
   save(data);
+}
+
+/** Drop any assignment for a recipe key that's no longer in the cookbook (e.g. evicted by the size cap). */
+export function clearAssignment(key: string) {
+  assignRecipeToCollection(key, null);
 }

@@ -1,4 +1,6 @@
 import type { Quest, Recipe } from "../types";
+import { localDayNumber } from "./date";
+import { safeSet } from "./storage";
 
 const ASIAN = ["chinese", "japanese", "thai", "korean", "vietnamese", "sichuan", "indian", "malaysian", "filipino"];
 const EURO = ["italian", "french", "spanish", "greek", "german", "portuguese", "british"];
@@ -45,7 +47,7 @@ const QUESTS: Quest[] = [
 export const QUEST_MULTIPLIER = 2;
 
 function dayNumber(): number {
-  return Math.floor(Date.now() / 86_400_000);
+  return localDayNumber();
 }
 
 /** The quest of the day — deterministic per calendar day. */
@@ -60,5 +62,5 @@ export function questDoneToday(): boolean {
 }
 
 export function markQuestDone() {
-  localStorage.setItem(QUEST_DONE_KEY, String(dayNumber()));
+  safeSet(QUEST_DONE_KEY, String(dayNumber()));
 }

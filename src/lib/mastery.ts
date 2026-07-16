@@ -1,5 +1,7 @@
 /** Recipe mastery — cook the same dish enough times and it becomes "mastered". */
 
+import { safeSet } from "./storage";
+
 const MASTERY_KEY = "souschef.mastery";
 export const MASTERY_THRESHOLD = 3;
 
@@ -12,7 +14,7 @@ function load(): Record<string, number> {
 }
 
 function save(m: Record<string, number>) {
-  localStorage.setItem(MASTERY_KEY, JSON.stringify(m));
+  safeSet(MASTERY_KEY, JSON.stringify(m));
 }
 
 export function masteryCount(title: string): number {

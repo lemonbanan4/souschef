@@ -1,4 +1,5 @@
 import type { ShoppingItem } from "../types";
+import { safeSet } from "./storage";
 
 /** Shopping list (localStorage). */
 
@@ -13,7 +14,7 @@ export function loadShopping(): ShoppingItem[] {
 }
 
 function save(items: ShoppingItem[]): ShoppingItem[] {
-  localStorage.setItem(SHOPPING_KEY, JSON.stringify(items));
+  safeSet(SHOPPING_KEY, JSON.stringify(items));
   return items;
 }
 

@@ -45,8 +45,16 @@ import { GOAL_DEFAULTS, checkGoalHitToday, goalPromptHint, loadDietGoal } from "
 import { getTodayNutrition, logCookedNutrition } from "./lib/nutritionLog";
 import { exportBackup, importBackup } from "./lib/backup";
 import { logCookDate } from "./lib/cookCalendar";
-import { assignRecipeToCollection, createCollection, loadAssignments, loadCollectionNames } from "./lib/collections";
+import {
+  assignRecipeToCollection,
+  clearAssignment,
+  createCollection,
+  deleteCollection,
+  loadAssignments,
+  loadCollectionNames,
+} from "./lib/collections";
 import { loadThemePref, setThemePref, type ThemePref } from "./lib/theme";
+import { safeSet } from "./lib/storage";
 import CookMode from "./components/CookMode";
 import ChefChat from "./components/ChefChat";
 import MealPlanner from "./components/MealPlanner";
@@ -90,6 +98,11 @@ function loadCookbook(): Recipe[] {
   } catch {
     return [];
   }
+}
+
+/** Recipes generated before the id migration fall back to title — title collisions among those are a known, accepted limitation. */
+function recipeKey(r: Recipe): string {
+  return r.id ?? r.title;
 }
 
 function loadPlan(): MealPlan | null {
@@ -394,27 +407,42 @@ export default function App() {
 
   function handleSave() {
     if (!recipe) return;
-    if (cookbook.some((r) => r.title === recipe.title)) {
+    if (cookbook.some((r) => recipeKey(r) === recipeKey(recipe))) {
       pushToast("Already in your cookbook 📖");
       return;
     }
-    const next = [recipe, ...cookbook].slice(0, 30);
+    const combined = [recipe, ...cookbook];
+    const next = combined.slice(0, 30);
+    const evicted = combined.slice(30);
+    for (const r of evicted) clearAssignment(recipeKey(r));
+    if (evicted.length > 0) setCollectionAssignments(loadAssignments());
     setCookbook(next);
-    localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+    safeSet(SAVED_KEY, JSON.stringify(next));
     chime();
     pushToast("Saved to your cookbook! 📖");
   }
 
   function handleCreateCollection() {
-    const names = createCollection(newCollectionName);
+    const { names, created } = createCollection(newCollectionName);
     setCollectionNames(names);
+    if (!created) {
+      pushToast(`Couldn't create "${newCollectionName.trim()}" — it's reserved or already exists.`, true);
+      return;
+    }
     setNewCollectionName("");
     setAddingCollection(false);
   }
 
-  function handleAssignCollection(title: string, name: string) {
-    assignRecipeToCollection(title, name || null);
+  function handleAssignCollection(key: string, name: string) {
+    assignRecipeToCollection(key, name || null);
     setCollectionAssignments(loadAssignments());
+  }
+
+  function handleDeleteCollection(name: string) {
+    deleteCollection(name);
+    setCollectionNames(loadCollectionNames());
+    setCollectionAssignments(loadAssignments());
+    if (collectionFilter === name) setCollectionFilter(null);
   }
 
   function toggleStep(i: number) {
@@ -572,7 +600,7 @@ export default function App() {
       const { plan: p, source } = await generateMealPlan({ pantry, diet, note: goalPromptHint(dietGoal) });
       setPlan(p);
       setPlanDemo(source === "demo");
-      localStorage.setItem(PLAN_KEY, JSON.stringify(p));
+      safeSet(PLAN_KEY, JSON.stringify(p));
       chime();
       ginoSay("proud", { text: "Ecco! Five dinners, one shopping trip. Perfetto! 🗓️" });
       const { state, newBadges } = bumpCounter(game, "plansMade");
@@ -866,7 +894,15 @@ export default function App() {
             <div>
               <h3 className="section-title">👨‍🍳 Steps <span style={{ fontSize: 12, color: "var(--ink-faint)", fontWeight: 700 }}>(tap to check off)</span></h3>
               {recipe.steps.map((step, i) => (
-                <div key={i} className={`step ${doneSteps.has(i) ? "done" : ""}`} onClick={() => toggleStep(i)}>
+                <div
+                  key={i}
+                  className={`step ${doneSteps.has(i) ? "done" : ""}`}
+                  role="checkbox"
+                  aria-checked={doneSteps.has(i)}
+                  tabIndex={0}
+                  onClick={() => toggleStep(i)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleStep(i); } }}
+                >
                   <div className="step-num">{doneSteps.has(i) ? "✓" : i + 1}</div>
                   <div className="step-text">{step}</div>
                 </div>
@@ -932,13 +968,22 @@ export default function App() {
               All
             </button>
             {collectionNames.map((name) => (
-              <button
-                key={name}
-                className={`collection-chip ${collectionFilter === name ? "active" : ""}`}
-                onClick={() => setCollectionFilter(name)}
-              >
-                📁 {name}
-              </button>
+              <span key={name} className="collection-chip-group">
+                <button
+                  className={`collection-chip ${collectionFilter === name ? "active" : ""}`}
+                  onClick={() => setCollectionFilter(name)}
+                >
+                  📁 {name}
+                </button>
+                <button
+                  className="collection-chip-delete"
+                  onClick={() => handleDeleteCollection(name)}
+                  aria-label={`Delete collection "${name}"`}
+                  title={`Delete collection "${name}"`}
+                >
+                  ×
+                </button>
+              </span>
             ))}
             <button className={`collection-chip ${collectionFilter === "Unsorted" ? "active" : ""}`} onClick={() => setCollectionFilter("Unsorted")}>
               Unsorted
@@ -962,13 +1007,14 @@ export default function App() {
           <div className="saved-grid">
             {cookbook
               .filter((r) => {
+                const key = recipeKey(r);
                 if (collectionFilter === null) return true;
-                if (collectionFilter === "Unsorted") return !collectionAssignments[r.title];
-                return collectionAssignments[r.title] === collectionFilter;
+                if (collectionFilter === "Unsorted") return !collectionAssignments[key];
+                return collectionAssignments[key] === collectionFilter;
               })
               .map((r) => (
                 <div
-                  key={r.title}
+                  key={recipeKey(r)}
                   className="saved-card"
                   role="button"
                   tabIndex={0}
@@ -981,9 +1027,10 @@ export default function App() {
                   {collectionNames.length > 0 && (
                     <select
                       className="saved-card-folder"
-                      value={collectionAssignments[r.title] ?? ""}
+                      value={collectionAssignments[recipeKey(r)] ?? ""}
+                      aria-label={`Move "${r.title}" to a collection`}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => handleAssignCollection(r.title, e.target.value)}
+                      onChange={(e) => handleAssignCollection(recipeKey(r), e.target.value)}
                     >
                       <option value="">Unsorted</option>
                       {collectionNames.map((name) => (

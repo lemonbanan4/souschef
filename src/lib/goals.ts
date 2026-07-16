@@ -1,8 +1,14 @@
 import type { DietGoal, DietGoalType } from "../types";
+import { localDateKey } from "./date";
+import { safeRemove, safeSet } from "./storage";
 
 /** Diet goal tracking — Cut / Maintain / Bulk, checked against what's been cooked today. */
 
 const GOAL_KEY = "souschef.dietGoal";
+// Tracked independently of the goal object itself: the only UI path to change goal *type*
+// clears the goal first (removeGoal → pickGoal), which would otherwise wipe today's "hit"
+// credit before a new goal object is even created, letting the same day double-earn the badge.
+const HIT_KEY = "souschef.goalLastHitDate";
 
 export const GOAL_DEFAULTS: Record<
   DietGoalType,
@@ -41,11 +47,11 @@ export function loadDietGoal(): DietGoal | null {
 }
 
 export function saveDietGoal(goal: DietGoal) {
-  localStorage.setItem(GOAL_KEY, JSON.stringify(goal));
+  safeSet(GOAL_KEY, JSON.stringify(goal));
 }
 
 export function clearDietGoal() {
-  localStorage.removeItem(GOAL_KEY);
+  safeRemove(GOAL_KEY);
 }
 
 export function setGoalType(type: DietGoalType): DietGoal {
@@ -54,7 +60,6 @@ export function setGoalType(type: DietGoalType): DietGoal {
     type,
     calorieTarget: defaults.calorieTarget,
     proteinTarget: defaults.proteinTarget,
-    lastHitDate: null,
   };
   saveDietGoal(goal);
   return goal;
@@ -85,14 +90,18 @@ export function goalPromptHint(goal: DietGoal | null): string | undefined {
   }
 }
 
-/** One-shot per day: true the first time today's calories land within the goal's ±15% band. */
+/**
+ * One-shot per day: true the first time today's calories land within the goal's ±15% band.
+ * Tracked independently of the goal object (see HIT_KEY) so switching goal type mid-day —
+ * which clears and recreates the goal — can't be used to re-earn the same day's credit.
+ */
 export function checkGoalHitToday(todayCalories: number): boolean {
   const goal = loadDietGoal();
   if (!goal || todayCalories <= 0) return false;
-  const today = new Date().toISOString().slice(0, 10);
-  if (goal.lastHitDate === today) return false;
+  const today = localDateKey();
+  if (localStorage.getItem(HIT_KEY) === today) return false;
   const withinBand = todayCalories >= goal.calorieTarget * 0.85 && todayCalories <= goal.calorieTarget * 1.15;
   if (!withinBand) return false;
-  saveDietGoal({ ...goal, lastHitDate: today });
+  safeSet(HIT_KEY, today);
   return true;
 }

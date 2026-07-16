@@ -13,6 +13,8 @@ export interface Nutrition {
 }
 
 export interface Recipe {
+  /** Unique per generation event — distinguishes two recipes that happen to share a title. */
+  id?: string;
   title: string;
   emoji: string;
   description: string;
@@ -151,8 +153,6 @@ export interface DietGoal {
   type: DietGoalType;
   calorieTarget: number;
   proteinTarget: number;
-  /** date (YYYY-MM-DD) the goal band was last hit — prevents double-counting the badge in one day */
-  lastHitDate: string | null;
 }
 
 export interface DayNutritionLog {

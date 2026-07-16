@@ -1,3 +1,5 @@
+import { safeSet } from "./storage";
+
 export type ThemePref = "light" | "dark" | "system";
 
 const KEY = "souschef.theme";
@@ -20,6 +22,6 @@ export function applyTheme(pref: ThemePref) {
 }
 
 export function setThemePref(pref: ThemePref) {
-  localStorage.setItem(KEY, pref);
+  safeSet(KEY, pref);
   applyTheme(pref);
 }

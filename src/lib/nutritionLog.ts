@@ -1,4 +1,6 @@
 import type { DayNutritionLog, Recipe } from "../types";
+import { localDateKey } from "./date";
+import { safeSet } from "./storage";
 
 /** A rolling daily log of cooked-recipe nutrition, backing the diet-goal progress bars. */
 
@@ -20,11 +22,11 @@ function save(store: LogStore) {
   while (keys.length > KEEP_DAYS) {
     delete store[keys.shift()!];
   }
-  localStorage.setItem(LOG_KEY, JSON.stringify(store));
+  safeSet(LOG_KEY, JSON.stringify(store));
 }
 
 function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateKey();
 }
 
 function parseGrams(s: string): number {

@@ -1,4 +1,5 @@
 import type { Rating, Verdict } from "../types";
+import { safeSet } from "./storage";
 
 /** Taste profile: lightweight ratings history that personalizes future recipes. */
 
@@ -22,7 +23,7 @@ export function loadRatings(): Rating[] {
 
 export function addRating(rating: Rating): Rating[] {
   const next = [rating, ...loadRatings()].slice(0, 50);
-  localStorage.setItem(TASTE_KEY, JSON.stringify(next));
+  safeSet(TASTE_KEY, JSON.stringify(next));
   return next;
 }
 

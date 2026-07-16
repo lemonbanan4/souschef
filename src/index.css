@@ -13,6 +13,8 @@
   --shadow-out: 0 12px 24px -8px rgba(214, 164, 26, 0.28), 0 4px 10px rgba(214, 164, 26, 0.12);
   --clay-inset: inset 6px 6px 12px rgba(255, 255, 255, 0.95), inset -6px -8px 14px rgba(222, 178, 54, 0.22);
   --clay-inset-yellow: inset 5px 5px 10px rgba(255, 255, 255, 0.55), inset -6px -8px 14px rgba(202, 138, 4, 0.35);
+  --gold-text: #b8860b;
+  --gold-text-strong: #7a5c04;
   --radius: 28px;
   font-family: "Nunito", -apple-system, "Segoe UI", sans-serif;
   color: var(--ink);
@@ -33,6 +35,8 @@
   --shadow-out: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
   --clay-inset: inset 6px 6px 12px rgba(255, 226, 158, 0.06), inset -6px -8px 14px rgba(0, 0, 0, 0.45);
   --clay-inset-yellow: inset 5px 5px 10px rgba(255, 226, 158, 0.1), inset -6px -8px 14px rgba(0, 0, 0, 0.5);
+  --gold-text: #f0c04a;
+  --gold-text-strong: #fbe08c;
 }
 
 :root[data-theme="dark"] body {
@@ -42,6 +46,22 @@
     var(--bg);
   background-repeat: no-repeat;
   background-color: var(--bg);
+}
+
+/* A few accent surfaces use hardcoded light-mode gradients rather than theme variables — re-skin them so they don't glow as bright light boxes inside an otherwise dark UI. */
+:root[data-theme="dark"] .chef-tip {
+  color: var(--gold-text-strong);
+  background: linear-gradient(145deg, #4a3a1c, #362a19);
+}
+
+:root[data-theme="dark"] .toast.error {
+  background: linear-gradient(145deg, #7a3226, #5c2118);
+  color: #ffd9cf;
+}
+
+:root[data-theme="dark"] .pantry-chip:hover {
+  background: linear-gradient(145deg, #5c2f24, #4a2018);
+  color: #ffbcae;
 }
 
 * {
@@ -346,7 +366,7 @@ input, textarea, select {
 .demo-note button {
   background: none;
   font-weight: 800;
-  color: #b8860b;
+  color: var(--gold-text);
   text-decoration: underline;
   font-size: 13px;
 }
@@ -839,7 +859,7 @@ input, textarea, select {
   font-family: "Baloo 2", sans-serif;
   font-weight: 800;
   font-size: 13px;
-  color: #b8860b;
+  color: var(--gold-text);
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
@@ -1120,6 +1140,28 @@ input, textarea, select {
   color: #fff;
 }
 
+.collection-chip-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.collection-chip-delete {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 800;
+  background: var(--yellow-soft);
+  color: var(--ink-faint);
+}
+
+.collection-chip-delete:hover {
+  background: #e2645a;
+  color: #fff;
+}
+
 .collection-new {
   display: flex;
   gap: 6px;
@@ -1369,7 +1411,7 @@ input, textarea, select {
   font-weight: 800;
   letter-spacing: 3px;
   font-size: 15px;
-  color: #7a5c04;
+  color: var(--gold-text-strong);
   margin-top: 6px;
 }
 
@@ -1390,7 +1432,7 @@ input, textarea, select {
 .levelup-sub {
   font-weight: 700;
   font-size: 13.5px;
-  color: #7a5c04;
+  color: var(--gold-text-strong);
   margin: 12px 0 20px;
 }
 

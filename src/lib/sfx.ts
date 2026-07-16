@@ -1,5 +1,7 @@
 /** Tiny WebAudio sound effects — no assets, all synthesized. */
 
+import { safeSet } from "./storage";
+
 const SOUND_KEY = "souschef.sound";
 
 let ctx: AudioContext | null = null;
@@ -20,7 +22,7 @@ export function soundOn(): boolean {
 }
 
 export function setSoundOn(on: boolean) {
-  localStorage.setItem(SOUND_KEY, on ? "1" : "0");
+  safeSet(SOUND_KEY, on ? "1" : "0");
 }
 
 function tone(freq: number, start: number, duration: number, type: OscillatorType = "sine", gain = 0.12) {

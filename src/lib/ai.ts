@@ -13,6 +13,8 @@ import {
   buildRecipePrompt,
   buildVisionSystem,
 } from "./schemas";
+import { makeId } from "./id";
+import { safeSet } from "./storage";
 
 /**
  * Three ways to reach the chef, in order of preference:
@@ -31,7 +33,7 @@ export function getApiKey(): string {
 }
 
 export function setApiKey(key: string) {
-  if (key.trim()) localStorage.setItem(KEY_STORAGE, key.trim());
+  if (key.trim()) safeSet(KEY_STORAGE, key.trim());
   else localStorage.removeItem(KEY_STORAGE);
 }
 
@@ -43,7 +45,7 @@ export function deviceId(): string {
   let id = localStorage.getItem(DEVICE_STORAGE);
   if (!id) {
     id = `dev_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-    localStorage.setItem(DEVICE_STORAGE, id);
+    safeSet(DEVICE_STORAGE, id);
   }
   return id;
 }
@@ -172,7 +174,8 @@ export async function generateRecipe(req: RecipeRequest): Promise<{ recipe: Reci
         messages: [{ role: "user", content: buildRecipePrompt(req) }],
       });
       assertNotRefusal(response);
-      return { recipe: JSON.parse(extractText(response)) as Recipe, source: "ai" };
+      const recipe = JSON.parse(extractText(response)) as Recipe;
+      return { recipe: { ...recipe, id: makeId() }, source: "ai" };
     } catch (error) {
       throw toChefError(error);
     }
@@ -181,14 +184,14 @@ export async function generateRecipe(req: RecipeRequest): Promise<{ recipe: Reci
   // 2. Kitchen proxy
   try {
     const data = await proxyPost("recipe", { request: req });
-    return { recipe: data.recipe as Recipe, source: "ai" };
+    return { recipe: { ...(data.recipe as Recipe), id: makeId() }, source: "ai" };
   } catch (error) {
     if (!(error instanceof KitchenUnavailable)) throw error;
   }
 
   // 3. Demo
   await new Promise((r) => setTimeout(r, 900));
-  return { recipe: localChefRecipe(req), source: "demo" };
+  return { recipe: { ...localChefRecipe(req), id: makeId() }, source: "demo" };
 }
 
 export async function askChef(recipe: Recipe, history: ChatMessage[], question: string): Promise<string> {

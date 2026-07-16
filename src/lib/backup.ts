@@ -1,6 +1,7 @@
 /** Export/import all SousChef localStorage data as a single JSON file — the only copy lives in the browser otherwise. */
 
 const PREFIX = "souschef.";
+const MAX_VALUE_LENGTH = 2_000_000; // guard against a maliciously huge value blowing up storage/parsing
 
 export function exportBackup() {
   const data: Record<string, string> = {};
@@ -27,7 +28,26 @@ export function importBackup(json: string): boolean {
   }
   if (!data || typeof data !== "object" || Array.isArray(data)) return false;
   const entries = Object.entries(data as Record<string, unknown>);
-  if (entries.length === 0 || !entries.every(([k, v]) => k.startsWith(PREFIX) && typeof v === "string")) return false;
-  for (const [key, value] of entries) localStorage.setItem(key, value as string);
-  return true;
+  const valid =
+    entries.length > 0 &&
+    entries.every(([k, v]) => k.startsWith(PREFIX) && typeof v === "string" && v.length <= MAX_VALUE_LENGTH);
+  if (!valid) return false;
+
+  // Snapshot existing values so a mid-import failure (e.g. QuotaExceededError) can be rolled back
+  // instead of leaving a half-old/half-new mix of data.
+  const snapshot = entries.map(([key]) => [key, localStorage.getItem(key)] as const);
+  try {
+    for (const [key, value] of entries) localStorage.setItem(key, value as string);
+    return true;
+  } catch {
+    for (const [key, prevValue] of snapshot) {
+      try {
+        if (prevValue === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, prevValue);
+      } catch {
+        // best-effort rollback — if storage is this broken there's nothing more we can do
+      }
+    }
+    return false;
+  }
 }

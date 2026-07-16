@@ -1,5 +1,8 @@
 /** A lightweight log of which calendar days had at least one cook, for the streak calendar view. */
 
+import { localDateKey } from "./date";
+import { safeSet } from "./storage";
+
 const KEY = "souschef.cookDates";
 const KEEP_DAYS = 400;
 
@@ -15,11 +18,11 @@ function load(): string[] {
 function save(dates: string[]) {
   const sorted = Array.from(new Set(dates)).sort();
   const trimmed = sorted.slice(-KEEP_DAYS);
-  localStorage.setItem(KEY, JSON.stringify(trimmed));
+  safeSet(KEY, JSON.stringify(trimmed));
 }
 
 export function logCookDate(date: Date = new Date()) {
-  const key = date.toISOString().slice(0, 10);
+  const key = localDateKey(date);
   const dates = load();
   if (!dates.includes(key)) save([...dates, key]);
 }

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — Cook with Gio</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fffaf0;
+    color: #3d3117;
+    font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  header img { width: 40px; height: 40px; }
+  header h1 { font-size: 22px; margin: 0; }
+  .updated { color: #8a7a52; font-size: 14px; margin-bottom: 40px; }
+  h2 {
+    font-size: 18px;
+    margin-top: 40px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #ffe9a8;
+  }
+  p, li { font-size: 15px; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  a { color: #b8860b; }
+  .pill {
+    display: inline-block;
+    background: #ffe9a8;
+    color: #6b4a2f;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ffe9a8; vertical-align: top; }
+  th { color: #6b4a2f; }
+  footer { margin-top: 56px; color: #8a7a52; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/gio-icon.svg" alt="" />
+    <h1>Cook with Gio — Privacy Policy</h1>
+  </header>
+  <p class="updated">Last updated: July 2026</p>
+
+  <p>Cook with Gio ("the app") is a cooking assistant built around an AI chef character named Gio. This page explains what data the app collects, why, and what happens to it. The short version: <strong>almost everything stays on your device</strong>, and the only things that leave it are what you type or photograph in order to get an AI response, plus an optional public leaderboard entry.</p>
+
+  <h2>Data stored only on your device</h2>
+  <p>The app stores the following directly in your device's local storage. It is never transmitted anywhere, and is deleted if you clear the app's data or uninstall it:</p>
+  <ul>
+    <li>Your pantry list, shopping list, and cooking history</li>
+    <li>Gamification state — XP, level, streaks, badges, quests, unlocked recipes</li>
+    <li>Recipe ratings and taste preferences</li>
+    <li>Nutrition log entries you add</li>
+    <li>App preferences (theme, sound on/off, display name)</li>
+    <li>A randomly generated device ID (not linked to your name, email, or any account — used only to apply fair-use rate limits to the AI features)</li>
+    <li>Your own Anthropic API key, if you choose to supply one instead of using the app's built-in AI access (see below)</li>
+  </ul>
+
+  <h2>Data sent to make the AI features work</h2>
+  <p>When you ask Gio for a recipe, a meal plan, or to identify ingredients from a photo, the relevant text (and photo, if you use the fridge-photo feature) is sent to Anthropic's Claude API to generate a response. Depending on your settings, this happens one of two ways:</p>
+  <table>
+    <tr><th>Mode</th><th>What happens</th></tr>
+    <tr>
+      <td><span class="pill">Default</span></td>
+      <td>Your request is sent to the app's own server, which forwards it to Anthropic using the app's API key, and returns the response. The server does not permanently store the content of your requests.</td>
+    </tr>
+    <tr>
+      <td><span class="pill">Bring your own key</span></td>
+      <td>If you enter your own Anthropic API key in Settings, your device talks to Anthropic directly. The app's own server never sees these requests or your key.</td>
+    </tr>
+  </table>
+  <p>See <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a> for how they handle API data.</p>
+
+  <h2>Optional public leaderboard</h2>
+  <p>If you choose to opt into the leaderboard feature, the display name you've chosen along with your XP, level, recipes cooked, and badge count are sent to the app's server and shown publicly to other users of the app. You can stop participating at any time; nothing else about you is shared.</p>
+
+  <h2>What the app does <em>not</em> do</h2>
+  <ul>
+    <li>No accounts, sign-up, or login — there is no email or password collected</li>
+    <li>No analytics or tracking SDKs, no advertising, no ad IDs</li>
+    <li>No location data</li>
+    <li>No selling or sharing of data with third parties, other than Anthropic solely to generate AI responses as described above</li>
+  </ul>
+
+  <h2>Camera / photo access</h2>
+  <p>The "what's in my fridge" feature uses your device's standard camera or photo picker to let you select or take a picture. The app only receives the image you explicitly choose to submit — it does not have background or persistent access to your camera or photo library.</p>
+
+  <h2>Data retention & deletion</h2>
+  <p>Since almost all data lives in your device's local storage, uninstalling the app or clearing its storage removes it. Server-side, only anonymous rate-limit counters (keyed by the random device ID) and, if you opted in, your leaderboard entry are retained. To request removal of a leaderboard entry, contact us at the address below.</p>
+
+  <h2>Children's privacy</h2>
+  <p>The app is not directed at children under 13 and does not knowingly collect personal information from them.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes, the "last updated" date at the top of this page will change accordingly.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy or your data can be sent to <a href="mailto:lemonhberg@gmail.com">lemonhberg@gmail.com</a>.</p>
+
+  <footer>Cook with Gio</footer>
+</div>
+</body>
+</html>

@@ -41,12 +41,17 @@ const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "i
 type ImageMediaType = "image/jpeg" | "image/png" | "image/webp" | "image/gif";
 
 // ---------- usage store (dev: JSON file; prod: use KV/DB) ----------
+// On Railway, RAILWAY_VOLUME_MOUNT_PATH points at the attached persistent
+// volume — without it, these files live on the container's ephemeral
+// filesystem and get wiped on every redeploy.
+
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? path.join(process.cwd(), "server");
 
 interface UsageFile {
   devices: Record<string, { tier: Tier; months: Record<string, Record<Scope, number>> }>;
 }
 
-const STORE_PATH = path.join(process.cwd(), "server", "usage.json");
+const STORE_PATH = path.join(DATA_DIR, "usage.json");
 
 function loadStore(): UsageFile {
   try {
@@ -89,7 +94,7 @@ interface LeaderboardEntryFile {
 
 type LeaderboardFile = Record<string, LeaderboardEntryFile>; // keyed by deviceId
 
-const LEADERBOARD_PATH = path.join(process.cwd(), "server", "leaderboard.json");
+const LEADERBOARD_PATH = path.join(DATA_DIR, "leaderboard.json");
 
 function loadLeaderboard(): LeaderboardFile {
   try {

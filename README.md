@@ -131,9 +131,9 @@ railway domain         # mint the public https URL
 railway variables --set ANTHROPIC_API_KEY=sk-ant-…   # enable the AI kitchen
 ```
 
-Note: `server/usage.json` and `server/leaderboard.json` are ephemeral in a
-container — add a Railway volume (or swap for KV/Postgres) when metering
-needs to survive redeploys.
+Usage/leaderboard data persists via a Railway volume mounted at the path in
+`RAILWAY_VOLUME_MOUNT_PATH` (falls back to `server/` locally). Swap for
+KV/Postgres if metering needs to scale beyond a single JSON file.
 
 ## iOS & Android (Capacitor)
 

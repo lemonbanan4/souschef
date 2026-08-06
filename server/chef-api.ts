@@ -154,7 +154,12 @@ function readBody(req: IncomingMessage, maxBytes = 200_000): Promise<unknown> {
     let data = "";
     req.on("data", (chunk: Buffer) => {
       data += chunk.toString();
-      if (data.length > maxBytes) reject(new Error("body too large"));
+      if (data.length > maxBytes) {
+        // Without destroying the socket, "data" events keep firing after
+        // reject() and this string grows unbounded — an easy memory-DoS.
+        req.destroy();
+        reject(new Error("body too large"));
+      }
     });
     req.on("end", () => {
       try {
@@ -397,8 +402,13 @@ function handleQuota(deviceId: string) {
   };
 }
 
-/** DEV STUB — in production this is a Stripe Checkout session + webhook. */
+/**
+ * DEV STUB — in production this is a Stripe Checkout session + webhook.
+ * Gated out of production entirely: with no auth, anyone who found this
+ * endpoint could grant themselves the pro tier's 30x quota for free.
+ */
 function handleUpgrade(deviceId: string) {
+  if (process.env.RAILWAY_ENVIRONMENT) return { status: 404, body: { error: "not-found" } };
   const store = loadStore();
   const device = deviceRecord(store, deviceId);
   device.tier = device.tier === "pro" ? "free" : "pro";

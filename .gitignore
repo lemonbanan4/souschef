@@ -32,3 +32,8 @@ server/leaderboard.json
 # Kept out of git: they bloat the repo Railway deploys from and broke its build snapshot.
 ios
 android
+
+# Android app-signing keystore — never commit, this is the Play Store upload key.
+keystore/
+*.jks
+*.keystore

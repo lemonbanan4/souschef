@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.cookwithgio.app',
+  appId: 'com.cogcore.cookwithgio',
   appName: 'Cook with Gio',
   webDir: 'dist',
   // Native builds bundle the web app locally; the kitchen API must be reached

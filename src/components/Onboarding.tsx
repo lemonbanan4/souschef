@@ -16,14 +16,15 @@ export function markOnboarded() {
 }
 
 interface Step {
-  emoji: string;
+  emoji?: string;
+  image?: string;
   title: string;
   text: string;
 }
 
 const STEPS: Step[] = [
   {
-    emoji: "👨‍🍳",
+    image: "/gio-icon.svg",
     title: "Ciao! I'm Chef Gio",
     text: "Tell me what you're craving — or what's in your pantry — and I'll invent a recipe just for you. No idea? Brave a 🎲 Mystery Basket!",
   },
@@ -56,7 +57,11 @@ export default function Onboarding({ onDone }: Props) {
   return (
     <div className="modal-overlay onboarding-overlay">
       <div className="modal clay onboarding-card">
-        <div className="onboarding-emoji">{s.emoji}</div>
+        {s.image ? (
+          <img src={s.image} alt="Chef Gio" className="onboarding-avatar" />
+        ) : (
+          <div className="onboarding-emoji">{s.emoji}</div>
+        )}
         <h2>{s.title}</h2>
         <p className="onboarding-text">{s.text}</p>
         <div className="onboarding-dots" aria-hidden="true">

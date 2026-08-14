@@ -751,6 +751,7 @@ input, textarea, select {
 }
 
 .onboarding-emoji { font-size: 60px; animation: gioBob 2.2s ease-in-out infinite; }
+.onboarding-avatar { width: 92px; height: 92px; animation: gioBob 2.2s ease-in-out infinite; }
 .onboarding-card h2 { margin: 8px 0 6px; }
 .onboarding-text { font-weight: 700; color: var(--ink-soft); font-size: 15px; line-height: 1.55; }
 

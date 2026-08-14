@@ -1858,8 +1858,8 @@ input, textarea, select {
 }
 
 .profile-avatar {
-  font-size: 54px;
-  line-height: 1;
+  width: 80px;
+  height: 80px;
 }
 
 .profile-name {

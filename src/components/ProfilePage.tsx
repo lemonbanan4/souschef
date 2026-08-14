@@ -85,7 +85,7 @@ export default function ProfilePage({ game, level, onClose, onShare, onGoalChang
         </div>
 
         <div className="profile-hero">
-          <div className="profile-avatar">🧑‍🍳</div>
+          <img src="/gio-face.svg" alt="Chef Gio" className="profile-avatar" />
           {editingName ? (
             <div className="profile-name-edit">
               <input

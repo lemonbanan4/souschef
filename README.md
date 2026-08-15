@@ -154,6 +154,19 @@ Developer account (signing) and a Play Console account (keystore + AAB).
 Regenerate icons/splashes after art changes with
 `npx @capacitor/assets generate --ios --android`.
 
+**If `ios/` is ever regenerated** (`rm -rf ios && npx cap add ios`), two
+manual steps don't survive that and need redoing — Capacitor's config
+doesn't cover Xcode capabilities/entitlements:
+1. Re-add the Sign In with Apple capability: recreate
+   `ios/App/App/App.entitlements` (`com.apple.developer.applesignin` →
+   `["Default"]`) and reference it via `CODE_SIGN_ENTITLEMENTS =
+   App/App.entitlements;` in both the Debug and Release build
+   configurations of the App target in `project.pbxproj`.
+2. Re-place `GoogleService-Info.plist` in `ios/App/App/` (and
+   `google-services.json` in `android/app/`, alongside the signing
+   keystore per the note above) — both come from the Firebase console
+   and aren't checked into the repo.
+
 ## Three ways to power the chef
 
 1. **Kitchen proxy (the product architecture)** — `server/chef-api.ts` runs as

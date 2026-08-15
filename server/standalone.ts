@@ -48,13 +48,13 @@ function setCors(req: IncomingMessage, res: ServerResponse) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   }
 }
 
 // ---------- basic per-IP rate limiting for the API ----------
-// The device-id metering alone is farmable (clear localStorage → fresh quota),
-// so back it with a coarse per-IP sliding window as a second line of defense.
+// Defense in depth alongside real per-user auth — bounds abuse from a single
+// source (e.g. a compromised or scripted account) regardless of identity.
 
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_REQUESTS = 60;

@@ -11,7 +11,6 @@ import type {
 } from "./types";
 import {
   ChefError,
-  devToggleProTier,
   fetchKitchenQuota,
   generateMealPlan,
   generateRecipe,
@@ -20,6 +19,10 @@ import {
   identifyIngredientsFromPhoto,
   setApiKey,
 } from "./lib/ai";
+import { signOut } from "./lib/auth";
+import { pushSnapshot } from "./lib/sync";
+import { configure as configureSubscription, isAvailable as subscriptionAvailable } from "./lib/subscription";
+import Paywall from "./components/Paywall";
 import {
   BADGES,
   awardBonusXp,
@@ -128,7 +131,7 @@ function cuisineGradient(cuisine: string): string {
 let toastId = 0;
 let gioMsgId = 0;
 
-export default function App() {
+export default function App({ uid }: { uid: string }) {
   const [game, setGame] = useState<GameState>(() => loadGame());
   const [tab, setTab] = useState<Tab>("craving");
   const [query, setQuery] = useState("");
@@ -157,6 +160,7 @@ export default function App() {
   const [questDone, setQuestDone] = useState(() => questDoneToday());
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [keyDraft, setKeyDraft] = useState("");
   const [soundDraft, setSoundDraft] = useState(true);
   const [themePref, setThemePrefState] = useState<ThemePref>(() => loadThemePref());
@@ -564,14 +568,21 @@ export default function App() {
     reader.readAsText(file);
   }
 
-  async function handleDevUpgrade() {
-    const next = await devToggleProTier();
-    if (next) {
-      setQuota(next);
-      chime();
-      pushToast(next.tier === "pro" ? "Pro kitchen unlocked (dev stub) ✨" : "Back to the free tier.");
-    }
-  }
+  // Configure RevenueCat once per session — no-ops on web, where purchases
+  // aren't available (see subscription.ts); the account's Pro status still
+  // shows correctly there via the server-verified quota.tier.
+  useEffect(() => {
+    if (subscriptionAvailable()) void configureSubscription(uid);
+  }, [uid]);
+
+  // Cross-device sync: push a debounced snapshot whenever the state that
+  // actually changes often is touched. Not every one of the 17 localStorage
+  // keys individually — game/pantry/cookbook cover the vast majority of
+  // real edits, and the debounce coalesces bursts (e.g. checking off
+  // several shopping items) into one write.
+  useEffect(() => {
+    pushSnapshot(uid);
+  }, [uid, game, pantry, cookbook]);
 
   // ----- Pantry -----
   function savePantryFromInput() {
@@ -1255,6 +1266,21 @@ export default function App() {
         <LeaderboardModal game={game} level={level} onClose={() => setShowLeaderboard(false)} />
       )}
 
+      {showPaywall && (
+        <Paywall
+          onClose={() => setShowPaywall(false)}
+          onPurchased={() => {
+            setShowPaywall(false);
+            chime();
+            pushToast("Pro kitchen unlocked! ✨");
+            // The RevenueCat webhook updates the server's tier record slightly
+            // after the purchase resolves client-side — re-fetch shortly after
+            // rather than racing it.
+            setTimeout(() => void fetchKitchenQuota().then(setQuota), 2000);
+          }}
+        />
+      )}
+
       {/* First-run onboarding */}
       {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
 
@@ -1294,9 +1320,19 @@ export default function App() {
                     <span className="quota-nums">{quota.usage[scope]} / {quota.limits[scope]}</span>
                   </div>
                 ))}
-                {import.meta.env.DEV && (
-                  <button className="chip" onClick={handleDevUpgrade} style={{ marginTop: 10 }}>
-                    {quota.tier === "pro" ? "Switch back to Free (dev stub)" : "⭐ Upgrade to Pro — $4.99/mo (dev stub)"}
+                {quota.tier === "pro" ? (
+                  <a
+                    className="chip"
+                    style={{ marginTop: 10, display: "inline-block" }}
+                    href={/android/i.test(navigator.userAgent)
+                      ? "https://play.google.com/store/account/subscriptions"
+                      : "itms-apps://apps.apple.com/account/subscriptions"}
+                  >
+                    Manage subscription
+                  </a>
+                ) : (
+                  <button className="chip" onClick={() => { setShowSettings(false); setShowPaywall(true); }} style={{ marginTop: 10 }}>
+                    ⭐ Upgrade to Pro
                   </button>
                 )}
               </div>
@@ -1335,7 +1371,7 @@ export default function App() {
             <div className="backup-section">
               <h3 className="section-title">💾 Backup & restore</h3>
               <p className="profile-hint" style={{ marginTop: 0 }}>
-                Everything lives in this browser only — export a backup before clearing site data or switching devices.
+                Your account already syncs everything across your devices — this is an extra local copy, handy before clearing site data.
               </p>
               <div className="backup-actions">
                 <button className="chip" onClick={exportBackup}>Export my data ⬇️</button>
@@ -1351,10 +1387,14 @@ export default function App() {
             </div>
 
             <p className="privacy-note">
-              🔒 Everything you do here — recipes, XP, pantry, goals — lives only in this browser.
-              The only data that leaves your device is what's needed to generate recipes with AI
-              (and your chef name + score, if you join a leaderboard).
+              🔒 Your recipes, XP, pantry and goals sync to your account across your devices.
+              The only other things that leave your device are what's needed to generate recipes with AI
+              (and your chef name + score, if you join a leaderboard). No ads, no tracking.
             </p>
+
+            <button className="ghost-btn" onClick={() => void signOut()} style={{ width: "100%", marginBottom: 10 }}>
+              Sign out
+            </button>
 
             <div className="modal-actions">
               <button className="ghost-btn" onClick={() => setShowSettings(false)}>Cancel</button>

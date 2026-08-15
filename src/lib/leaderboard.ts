@@ -1,13 +1,18 @@
 import type { LeaderboardResult } from "../types";
-import { deviceId } from "./ai";
+import { getIdToken } from "./auth";
 import { API_BASE } from "./apiBase";
 
 /**
- * LAN kitchen leaderboard — backed by the same dev-server proxy as the AI
- * kitchen (server/chef-api.ts), but entirely independent of it: works with
- * no Anthropic credentials configured at all. Anyone hitting this server
- * (e.g. everyone on the same WiFi as the dev machine) shows up here.
+ * Global kitchen leaderboard — backed by the same server as the AI kitchen
+ * (server/chef-api.ts), but entirely independent of it: works with no
+ * Anthropic credentials configured at all. Requires a signed-in account,
+ * same as the rest of the app — entries are keyed by the authenticated uid.
  */
+
+async function authHeader(): Promise<Record<string, string>> {
+  const token = await getIdToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
 
 export async function submitToLeaderboard(stats: {
   name: string;
@@ -19,7 +24,7 @@ export async function submitToLeaderboard(stats: {
   try {
     const res = await fetch(`${API_BASE}/api/leaderboard/submit`, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-device-id": deviceId() },
+      headers: { "content-type": "application/json", ...(await authHeader()) },
       body: JSON.stringify(stats),
     });
     return res.ok;
@@ -30,7 +35,7 @@ export async function submitToLeaderboard(stats: {
 
 export async function fetchLeaderboard(): Promise<LeaderboardResult | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/leaderboard/top`, { headers: { "x-device-id": deviceId() } });
+    const res = await fetch(`${API_BASE}/api/leaderboard/top`, { headers: await authHeader() });
     if (!res.ok) return null;
     return (await res.json()) as LeaderboardResult;
   } catch {

@@ -1,6 +1,6 @@
-import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import Anthropic from "@anthropic-ai/sdk";
 import {
@@ -15,73 +15,27 @@ import {
   buildVisionSystem,
 } from "../src/lib/schemas.ts";
 import type { ChatMessage, RecipeRequest } from "../src/types.ts";
+import { verifyIdToken } from "./firebaseAdmin.ts";
+import { json, readBody } from "./http.ts";
+import { handleRevenueCatWebhook } from "./revenuecat.ts";
+import { LIMITS, loadStore, monthKey, saveStore, userRecord, type Scope } from "./usageStore.ts";
 
 /**
  * Cook with Gio kitchen proxy — holds the operator's Anthropic key server-side,
- * meters usage per device, and enforces free/pro tier limits.
+ * meters usage per authenticated user, and enforces free/pro tier limits.
+ *
+ * Every request (except the RevenueCat webhook, which authenticates itself
+ * differently) must carry a valid Firebase ID token as
+ * "Authorization: Bearer <token>" — there is no guest/anonymous mode.
  *
  * Dev: mounted as Vite middleware (see vite.config.ts) — the same handlers
  * port 1:1 to a Cloudflare Worker / Vercel function for production.
- *
- * Production TODOs (deliberately out of scope for local dev):
- *  - Swap the JSON-file usage store for KV / a database
- *  - Replace x-device-id with authenticated user ids (Clerk / Supabase)
- *  - Replace /billing/upgrade dev stub with a Stripe Checkout webhook
  */
-
-type Scope = "recipe" | "chat" | "plan" | "vision";
-type Tier = "free" | "pro";
-
-const LIMITS: Record<Tier, Record<Scope, number>> = {
-  free: { recipe: 10, chat: 25, plan: 2, vision: 5 },
-  pro: { recipe: 300, chat: 500, plan: 20, vision: 60 },
-};
 
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 type ImageMediaType = "image/jpeg" | "image/png" | "image/webp" | "image/gif";
 
-// ---------- usage store (dev: JSON file; prod: use KV/DB) ----------
-// On Railway, RAILWAY_VOLUME_MOUNT_PATH points at the attached persistent
-// volume — without it, these files live on the container's ephemeral
-// filesystem and get wiped on every redeploy.
-
-const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? path.join(process.cwd(), "server");
-
-interface UsageFile {
-  devices: Record<string, { tier: Tier; months: Record<string, Record<Scope, number>> }>;
-}
-
-const STORE_PATH = path.join(DATA_DIR, "usage.json");
-
-function loadStore(): UsageFile {
-  try {
-    return JSON.parse(fs.readFileSync(STORE_PATH, "utf8")) as UsageFile;
-  } catch {
-    return { devices: {} };
-  }
-}
-
-function saveStore(store: UsageFile) {
-  fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
-}
-
-function monthKey(): string {
-  return new Date().toISOString().slice(0, 7); // YYYY-MM
-}
-
-function deviceRecord(store: UsageFile, deviceId: string) {
-  store.devices[deviceId] ??= { tier: "free", months: {} };
-  const device = store.devices[deviceId];
-  device.months[monthKey()] ??= { recipe: 0, chat: 0, plan: 0, vision: 0 };
-  return device;
-}
-
 // ---------- leaderboard store (dev: JSON file; prod: use KV/DB) ----------
-// Independent of the AI kitchen entirely — no Anthropic credentials required.
-// Anyone who can reach this server (e.g. everyone on the same WiFi as the
-// dev machine) can join, which makes it a natural "duel your friends" board
-// for a LAN-exposed dev server. Not authenticated — fine for a casual local
-// feature, not hardened for public internet deployment as-is.
 
 interface LeaderboardEntryFile {
   name: string;
@@ -92,8 +46,9 @@ interface LeaderboardEntryFile {
   updatedAt: string;
 }
 
-type LeaderboardFile = Record<string, LeaderboardEntryFile>; // keyed by deviceId
+type LeaderboardFile = Record<string, LeaderboardEntryFile>; // keyed by uid
 
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? path.join(process.cwd(), "server");
 const LEADERBOARD_PATH = path.join(DATA_DIR, "leaderboard.json");
 
 function loadLeaderboard(): LeaderboardFile {
@@ -108,7 +63,7 @@ function saveLeaderboard(board: LeaderboardFile) {
   fs.writeFileSync(LEADERBOARD_PATH, JSON.stringify(board, null, 2));
 }
 
-function handleLeaderboardSubmit(deviceId: string, body: Record<string, unknown>) {
+function handleLeaderboardSubmit(uid: string, body: Record<string, unknown>) {
   const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
   const xp = typeof body.xp === "number" && Number.isFinite(body.xp) ? Math.max(0, Math.floor(body.xp)) : 0;
   const level = typeof body.level === "number" && Number.isFinite(body.level) ? Math.max(1, Math.floor(body.level)) : 1;
@@ -117,18 +72,18 @@ function handleLeaderboardSubmit(deviceId: string, body: Record<string, unknown>
   if (!name) return { status: 400, body: { error: "bad-request" } };
 
   const board = loadLeaderboard();
-  board[deviceId] = { name, xp, level, cooked, badges, updatedAt: new Date().toISOString() };
+  board[uid] = { name, xp, level, cooked, badges, updatedAt: new Date().toISOString() };
   saveLeaderboard(board);
   return { status: 200, body: { ok: true } };
 }
 
-function handleLeaderboardTop(deviceId: string) {
+function handleLeaderboardTop(uid: string) {
   const board = loadLeaderboard();
   const all = Object.entries(board)
     .map(([id, e]) => ({ id, ...e }))
     .sort((a, b) => b.xp - a.xp);
   const top = all.slice(0, 50).map(({ id: _id, ...rest }) => rest);
-  const rankIndex = all.findIndex((e) => e.id === deviceId);
+  const rankIndex = all.findIndex((e) => e.id === uid);
   const you = rankIndex >= 0 ? all[rankIndex] : null;
   return {
     status: 200,
@@ -141,36 +96,7 @@ function handleLeaderboardTop(deviceId: string) {
   };
 }
 
-// ---------- helpers ----------
-
-function json(res: ServerResponse, status: number, body: unknown) {
-  res.statusCode = status;
-  res.setHeader("content-type", "application/json");
-  res.end(JSON.stringify(body));
-}
-
-function readBody(req: IncomingMessage, maxBytes = 200_000): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (chunk: Buffer) => {
-      data += chunk.toString();
-      if (data.length > maxBytes) {
-        // Without destroying the socket, "data" events keep firing after
-        // reject() and this string grows unbounded — an easy memory-DoS.
-        req.destroy();
-        reject(new Error("body too large"));
-      }
-    });
-    req.on("end", () => {
-      try {
-        resolve(data ? JSON.parse(data) : {});
-      } catch {
-        reject(new Error("invalid json"));
-      }
-    });
-    req.on("error", reject);
-  });
-}
+// ---------- Anthropic client ----------
 
 let cachedClient: Anthropic | null = null;
 
@@ -208,7 +134,7 @@ function extractText(response: Anthropic.Message): string | null {
 
 /** Check quota, run the call, then record usage. Returns an http-ish result. */
 async function metered(
-  deviceId: string,
+  uid: string,
   scope: Scope,
   run: (client: Anthropic) => Promise<{ status: number; body: unknown }>,
 ): Promise<{ status: number; body: unknown }> {
@@ -216,11 +142,11 @@ async function metered(
   if (!client) return { status: 503, body: { error: "not-configured" } };
 
   const store = loadStore();
-  const device = deviceRecord(store, deviceId);
-  const usage = device.months[monthKey()];
-  const limit = LIMITS[device.tier][scope];
+  const user = userRecord(store, uid);
+  const usage = user.months[monthKey()];
+  const limit = LIMITS[user.tier][scope];
   if (usage[scope] >= limit) {
-    return { status: 429, body: { error: "quota", scope, used: usage[scope], limit, tier: device.tier } };
+    return { status: 429, body: { error: "quota", scope, used: usage[scope], limit, tier: user.tier } };
   }
 
   const result = await run(client);
@@ -259,12 +185,12 @@ function parseModelJson(response: Anthropic.Message, text: string): { ok: true; 
 
 // ---------- route handlers ----------
 
-async function handleRecipe(deviceId: string, body: Record<string, unknown>) {
+async function handleRecipe(uid: string, body: Record<string, unknown>) {
   const req = body.request as RecipeRequest;
   const taste = typeof body.taste === "string" ? body.taste : null;
   if (!req?.query || !req.mode) return { status: 400, body: { error: "bad-request" } };
 
-  return metered(deviceId, "recipe", async (client) => {
+  return metered(uid, "recipe", async (client) => {
     try {
       const response = await client.messages.create({
         model: MODELS.recipe,
@@ -290,14 +216,14 @@ async function handleRecipe(deviceId: string, body: Record<string, unknown>) {
   });
 }
 
-async function handleChat(deviceId: string, body: Record<string, unknown>) {
+async function handleChat(uid: string, body: Record<string, unknown>) {
   const recipeJson = JSON.stringify(body.recipe ?? null);
   const history = (Array.isArray(body.history) ? body.history : []) as ChatMessage[];
   const question = typeof body.question === "string" ? body.question.slice(0, 2000) : "";
   const taste = typeof body.taste === "string" ? body.taste : null;
   if (!body.recipe || !question) return { status: 400, body: { error: "bad-request" } };
 
-  return metered(deviceId, "chat", async (client) => {
+  return metered(uid, "chat", async (client) => {
     try {
       const response = await client.messages.create({
         model: MODELS.chat,
@@ -318,13 +244,13 @@ async function handleChat(deviceId: string, body: Record<string, unknown>) {
   });
 }
 
-async function handlePlan(deviceId: string, body: Record<string, unknown>) {
+async function handlePlan(uid: string, body: Record<string, unknown>) {
   const pantry = (Array.isArray(body.pantry) ? body.pantry : []).slice(0, 60).map(String);
   const diet = typeof body.diet === "string" ? body.diet : undefined;
   const note = typeof body.note === "string" ? body.note : undefined;
   const taste = typeof body.taste === "string" ? body.taste : null;
 
-  return metered(deviceId, "plan", async (client) => {
+  return metered(uid, "plan", async (client) => {
     try {
       const response = await client.messages.create({
         model: MODELS.plan,
@@ -348,13 +274,13 @@ async function handlePlan(deviceId: string, body: Record<string, unknown>) {
   });
 }
 
-async function handleVision(deviceId: string, body: Record<string, unknown>) {
+async function handleVision(uid: string, body: Record<string, unknown>) {
   const image = typeof body.image === "string" ? body.image : "";
   const rawMediaType = typeof body.mediaType === "string" ? body.mediaType : "image/jpeg";
   const mediaType: ImageMediaType = ALLOWED_IMAGE_TYPES.has(rawMediaType) ? (rawMediaType as ImageMediaType) : "image/jpeg";
   if (!image) return { status: 400, body: { error: "bad-request" } };
 
-  return metered(deviceId, "vision", async (client) => {
+  return metered(uid, "vision", async (client) => {
     try {
       const response = await client.messages.create({
         model: MODELS.vision,
@@ -386,34 +312,20 @@ async function handleVision(deviceId: string, body: Record<string, unknown>) {
   });
 }
 
-function handleQuota(deviceId: string) {
+function handleQuota(uid: string) {
   const configured = getClient() !== null;
   const store = loadStore();
-  const device = deviceRecord(store, deviceId);
+  const user = userRecord(store, uid);
   return {
     status: 200,
     body: {
       configured,
-      tier: device.tier,
+      tier: user.tier,
       month: monthKey(),
-      usage: device.months[monthKey()],
-      limits: LIMITS[device.tier],
+      usage: user.months[monthKey()],
+      limits: LIMITS[user.tier],
     },
   };
-}
-
-/**
- * DEV STUB — in production this is a Stripe Checkout session + webhook.
- * Gated out of production entirely: with no auth, anyone who found this
- * endpoint could grant themselves the pro tier's 30x quota for free.
- */
-function handleUpgrade(deviceId: string) {
-  if (process.env.RAILWAY_ENVIRONMENT) return { status: 404, body: { error: "not-found" } };
-  const store = loadStore();
-  const device = deviceRecord(store, deviceId);
-  device.tier = device.tier === "pro" ? "free" : "pro";
-  saveStore(store);
-  return { status: 200, body: { tier: device.tier, note: "dev stub — wire Stripe here for production" } };
 }
 
 // ---------- middleware ----------
@@ -422,43 +334,48 @@ function handleUpgrade(deviceId: string) {
 export function chefApi() {
   return async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     const url = (req.url ?? "").split("?")[0];
-    const deviceId = (req.headers["x-device-id"] as string | undefined)?.slice(0, 64) ?? "anonymous";
 
     try {
+      // The RevenueCat webhook is called by RevenueCat's servers, not a
+      // signed-in user — it authenticates via its own shared-secret header,
+      // so it's handled before (and instead of) the Firebase token check below.
+      if (req.method === "POST" && url === "/revenuecat/webhook") {
+        return await handleRevenueCatWebhook(req, res);
+      }
+
+      const uid = await verifyIdToken(req);
+      if (!uid) return json(res, 401, { error: "unauthorized" });
+
       if (req.method === "GET" && url === "/chef/quota") {
-        const r = handleQuota(deviceId);
+        const r = handleQuota(uid);
         return json(res, r.status, r.body);
       }
       if (req.method === "GET" && url === "/leaderboard/top") {
-        const r = handleLeaderboardTop(deviceId);
+        const r = handleLeaderboardTop(uid);
         return json(res, r.status, r.body);
       }
       if (req.method === "POST") {
-        if (url === "/billing/upgrade") {
-          const r = handleUpgrade(deviceId);
-          return json(res, r.status, r.body);
-        }
         if (url === "/leaderboard/submit") {
           const body = (await readBody(req)) as Record<string, unknown>;
-          const r = handleLeaderboardSubmit(deviceId, body);
+          const r = handleLeaderboardSubmit(uid, body);
           return json(res, r.status, r.body);
         }
         if (url === "/chef/vision") {
           const body = (await readBody(req, 3_000_000)) as Record<string, unknown>;
-          const r = await handleVision(deviceId, body);
+          const r = await handleVision(uid, body);
           return json(res, r.status, r.body);
         }
         const body = (await readBody(req)) as Record<string, unknown>;
         if (url === "/chef/recipe") {
-          const r = await handleRecipe(deviceId, body);
+          const r = await handleRecipe(uid, body);
           return json(res, r.status, r.body);
         }
         if (url === "/chef/chat") {
-          const r = await handleChat(deviceId, body);
+          const r = await handleChat(uid, body);
           return json(res, r.status, r.body);
         }
         if (url === "/chef/plan") {
-          const r = await handlePlan(deviceId, body);
+          const r = await handlePlan(uid, body);
           return json(res, r.status, r.body);
         }
       }

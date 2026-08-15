@@ -16,6 +16,7 @@ import {
 import { makeId } from "./id";
 import { safeSet } from "./storage";
 import { API_BASE } from "./apiBase";
+import { getIdToken } from "./auth";
 
 /**
  * Three ways to reach the chef, in order of preference:
@@ -25,7 +26,6 @@ import { API_BASE } from "./apiBase";
  */
 
 const KEY_STORAGE = "souschef.apiKey";
-const DEVICE_STORAGE = "souschef.deviceId";
 
 export type ChefSource = "ai" | "demo";
 
@@ -42,13 +42,10 @@ export function hasApiKey(): boolean {
   return getApiKey().length > 0;
 }
 
-export function deviceId(): string {
-  let id = localStorage.getItem(DEVICE_STORAGE);
-  if (!id) {
-    id = `dev_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-    safeSet(DEVICE_STORAGE, id);
-  }
-  return id;
+/** Auth header for the kitchen proxy — every request needs a valid Firebase ID token, there's no guest mode. */
+async function authHeader(): Promise<Record<string, string>> {
+  const token = await getIdToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
 }
 
 export class ChefError extends Error {
@@ -89,7 +86,7 @@ async function proxyPost(path: string, body: Record<string, unknown>): Promise<R
   try {
     res = await fetch(`${API_BASE}/api/chef/${path}`, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-device-id": deviceId() },
+      headers: { "content-type": "application/json", ...(await authHeader()) },
       body: JSON.stringify({ ...body, taste: tasteSummary() }),
     });
   } catch {
@@ -97,6 +94,7 @@ async function proxyPost(path: string, body: Record<string, unknown>): Promise<R
   }
 
   if (res.status === 503) throw new KitchenUnavailable();
+  if (res.status === 401) throw new ChefError("Your session expired — please sign in again.", false);
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
 
   if (res.status === 429) {
@@ -119,23 +117,9 @@ async function proxyPost(path: string, body: Record<string, unknown>): Promise<R
 
 export async function fetchKitchenQuota(): Promise<KitchenQuota | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/chef/quota`, { headers: { "x-device-id": deviceId() } });
+    const res = await fetch(`${API_BASE}/api/chef/quota`, { headers: await authHeader() });
     if (!res.ok) return null;
     return (await res.json()) as KitchenQuota;
-  } catch {
-    return null;
-  }
-}
-
-/** DEV STUB — production replaces this with Stripe Checkout. */
-export async function devToggleProTier(): Promise<KitchenQuota | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/billing/upgrade`, {
-      method: "POST",
-      headers: { "x-device-id": deviceId() },
-    });
-    if (!res.ok) return null;
-    return fetchKitchenQuota();
   } catch {
     return null;
   }

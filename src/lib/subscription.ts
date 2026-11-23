@@ -1,30 +1,32 @@
-import { PACKAGE_TYPE, Purchases } from "@revenuecat/purchases-capacitor";
+import { Capacitor } from "@capacitor/core";
+import { LOG_LEVEL, PACKAGE_TYPE, Purchases } from "@revenuecat/purchases-capacitor";
 import type { CustomerInfo, PurchasesOffering, PurchasesPackage } from "@revenuecat/purchases-capacitor";
+import { PRO_ENTITLEMENT } from "./entitlements";
 
 /**
- * Thin wrapper over the RevenueCat Capacitor plugin — wraps StoreKit (iOS)
- * and Play Billing (Android), required by both stores for in-app digital
- * purchases. Configured with the Firebase uid as the RevenueCat appUserID
- * (RevenueCat's documented Firebase-integration pattern) so entitlements
- * tie to the account, not the device.
- *
- * Purchases can't run in a plain web browser — see isAvailable(). A signed-in
- * web user's Pro status still reflects real purchases, since the server
- * checks the tier set by the RevenueCat webhook (server/revenuecat.ts),
- * not anything client-side.
+ * Capacitor RevenueCat SDK (@revenuecat/purchases-capacitor) — StoreKit + Play Billing.
+ * Firebase uid is the RevenueCat appUserID; server tier is updated via webhook.
  */
 
-const PRO_ENTITLEMENT = "pro";
-
 function apiKeyForPlatform(): string | undefined {
-  // RevenueCat issues separate public SDK keys per store.
-  if (/android/i.test(navigator.userAgent)) return import.meta.env.VITE_REVENUECAT_ANDROID_KEY;
-  return import.meta.env.VITE_REVENUECAT_IOS_KEY;
+  const platform = Capacitor.getPlatform();
+  const testKey = import.meta.env.VITE_REVENUECAT_TEST_KEY;
+  const iosKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
+  const androidKey = import.meta.env.VITE_REVENUECAT_ANDROID_KEY;
+
+  const useTestStore =
+    testKey &&
+    (import.meta.env.DEV || import.meta.env.VITE_REVENUECAT_USE_TEST_STORE === "true");
+
+  if (useTestStore) return testKey;
+
+  if (platform === "android") return androidKey;
+  if (platform === "ios") return iosKey;
+  return undefined;
 }
 
-/** Purchases only work inside the native iOS/Android app, not a browser tab. */
 export function isAvailable(): boolean {
-  return Boolean(apiKeyForPlatform()) && /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+  return Capacitor.isNativePlatform() && Boolean(apiKeyForPlatform());
 }
 
 let configured = false;
@@ -33,6 +35,9 @@ export async function configure(uid: string): Promise<void> {
   if (configured || !isAvailable()) return;
   const apiKey = apiKeyForPlatform();
   if (!apiKey) return;
+  if (import.meta.env.DEV) {
+    await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+  }
   await Purchases.configure({ apiKey, appUserID: uid });
   configured = true;
 }
@@ -62,5 +67,5 @@ function isPro(customerInfo: CustomerInfo): boolean {
   return PRO_ENTITLEMENT in customerInfo.entitlements.active;
 }
 
-export { PACKAGE_TYPE };
+export { PACKAGE_TYPE, PRO_ENTITLEMENT };
 export type { PurchasesOffering, PurchasesPackage };

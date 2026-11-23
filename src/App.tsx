@@ -19,6 +19,7 @@ import {
   identifyIngredientsFromPhoto,
   setApiKey,
 } from "./lib/ai";
+import { surpriseMeFromRecipe } from "./lib/surpriseMe";
 import { signOut } from "./lib/auth";
 import { pushSnapshot } from "./lib/sync";
 import { configure as configureSubscription, isAvailable as subscriptionAvailable } from "./lib/subscription";
@@ -336,6 +337,29 @@ export default function App({ uid }: { uid: string }) {
     } catch (e) {
       gioSay("happy", "error");
       pushToast(e instanceof ChefError ? e.message : "Something went wrong. Try again!", true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSurpriseMe() {
+    if (!recipe || loading) return;
+    setLoading(true);
+    setCookedThis(false);
+    setRatedThis(false);
+    setServingsWanted(null);
+    setDoneSteps(new Set());
+    sizzle();
+    gioSay("cooking", "cooking", true);
+    try {
+      const { recipe: r, source } = await surpriseMeFromRecipe(recipe);
+      setRecipe(r);
+      setRecipeSource(source);
+      gioSay("happy", "served");
+      requestAnimationFrame(() => recipeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    } catch (e) {
+      gioSay("happy", "error");
+      pushToast(e instanceof ChefError ? e.message : "Surprise fizzled — try again!", true);
     } finally {
       setLoading(false);
     }
@@ -1019,6 +1043,7 @@ export default function App({ uid }: { uid: string }) {
             </button>
             <button className="ghost-btn" onClick={handleSave}>Save to cookbook 📖</button>
             <button className="ghost-btn" onClick={() => handleGenerate(lastGeneration?.query, { mystery: lastGeneration?.mystery })}>Another idea 🔄</button>
+            <button className="ghost-btn" onClick={handleSurpriseMe} title="AI twist on this dish">Surprise Me 🎲</button>
           </div>
 
           {cookedThis && !ratedThis && (
@@ -1298,7 +1323,7 @@ export default function App({ uid }: { uid: string }) {
       {/* Settings modal */}
       {showSettings && (
         <div className="modal-overlay" onClick={() => setShowSettings(false)}>
-          <div className="modal clay" onClick={(e) => e.stopPropagation()}>
+          <div className="modal clay modal-scroll" onClick={(e) => e.stopPropagation()}>
             <h2>⚙️ Kitchen settings</h2>
 
             {quota?.configured && (

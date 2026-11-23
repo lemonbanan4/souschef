@@ -121,14 +121,17 @@ URLs on the real domain.
 
 ### Deploy to Railway
 
-The repo ships a `Dockerfile` + `railway.toml`, so deployment is:
+The repo ships a `Dockerfile` + `railway.toml`. **Production wiring (Railway +
+RevenueCat, env vars, webhooks, mobile keys)** lives in
+[`docs/PRODUCTION.md`](docs/PRODUCTION.md). Quick deploy:
 
 ```bash
-railway login          # one-time, opens the browser
-railway init           # create the project (pick a name)
-railway up             # build & deploy
-railway domain         # mint the public https URL
-railway variables --set ANTHROPIC_API_KEY=sk-ant-…   # enable the AI kitchen
+source ~/.railway/env   # after `curl -fsSL agents.railway.com | sh`
+cd souschef
+railway up -y           # or ./scripts/railway-bootstrap.sh
+railway domain          # if no public URL yet
+railway variable set ANTHROPIC_API_KEY=sk-ant-…
+railway variable set "FIREBASE_SERVICE_ACCOUNT_JSON=$(jq -c . serviceAccount.json)"
 ```
 
 Usage/leaderboard data persists via a Railway volume mounted at the path in

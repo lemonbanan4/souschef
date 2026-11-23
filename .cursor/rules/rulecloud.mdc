@@ -1,0 +1,12 @@
+---
+description: Run RuleCloud guardrail checks before finishing edits
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+Before marking a coding task complete:
+
+1. Run `rulecloud check` on changed files (or use the RuleCloud MCP `scan_code` tool).
+2. Fix any `[BLOCKED]` violations before proceeding.
+3. Keep `.guardrail/rules.yml` synced via `rulecloud init` when Cloud Rulespacks change in the console.

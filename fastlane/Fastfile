@@ -1,0 +1,80 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Upload screenshots only for current Deliverfile app_version (no metadata, no IPA)"
+  lane :upload_screenshots do
+    key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_FILEPATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    deliver(
+      api_key: key,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+      submit_for_review: false,
+      force: true,
+      overwrite_screenshots: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Upload App Store Connect metadata and screenshots (no IPA, no submit)"
+  lane :deliver_metadata do
+    key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_FILEPATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    deliver(
+      api_key: key,
+      skip_binary_upload: true,
+      submit_for_review: false,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Archive Release and upload IPA to App Store Connect (no metadata, no submit)"
+  lane :upload_ipa do
+    key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_FILEPATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    gym(
+      project: "ios/App/App.xcodeproj",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      export_team_id: ENV.fetch("ASC_TEAM_ID", "HT252YCTSN"),
+      xcargs: "-allowProvisioningUpdates",
+      clean: true,
+      skip_package_ipa: false,
+      skip_archive: false
+    )
+
+    deliver(
+      api_key: key,
+      ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
+      skip_metadata: true,
+      skip_screenshots: true,
+      skip_binary_upload: false,
+      submit_for_review: false,
+      force: true,
+      run_precheck_before_submit: false,
+      precheck_include_in_app_purchases: false
+    )
+  end
+end

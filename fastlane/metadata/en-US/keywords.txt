@@ -1,0 +1,1 @@
+cooking,recipes,AI chef,meal planner,pantry,fridge,scanner,grocery,diet,calories,streak,Italian,Gio

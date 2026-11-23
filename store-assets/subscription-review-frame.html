@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1290, height=2796, initial-scale=1" />
+  <title>Cook with Gio Pro — review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1290px;
+      height: 2796px;
+      overflow: hidden;
+      font-family: "Nunito", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 85% -10%, #ffe9a8 0%, transparent 60%),
+        radial-gradient(900px 500px at -10% 30%, #fff3cd 0%, transparent 55%),
+        #fffaf0;
+      color: #2a1f0a;
+    }
+    .overlay {
+      min-height: 2796px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+    .card {
+      width: 560px;
+      padding: 48px 40px 40px;
+      text-align: center;
+      border-radius: 32px;
+      background: linear-gradient(145deg, #fff9e8, #fff5d6);
+      box-shadow:
+        18px 18px 40px rgba(180, 130, 20, 0.22),
+        inset 6px 6px 14px rgba(255, 255, 255, 0.9),
+        inset -4px -4px 10px rgba(206, 160, 34, 0.15);
+    }
+    .avatar { width: 96px; height: 96px; margin-bottom: 12px; }
+    h1 {
+      font-family: "Baloo 2", sans-serif;
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+    .sub {
+      font-size: 22px;
+      font-weight: 700;
+      color: #6b5a2e;
+      line-height: 1.45;
+      margin-bottom: 28px;
+    }
+    .plan-primary {
+      width: 100%;
+      border: none;
+      border-radius: 22px;
+      padding: 22px 24px;
+      font-size: 22px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: default;
+      background: linear-gradient(145deg, #ffdd66, #ffbe0b);
+      box-shadow: 0 12px 28px rgba(160, 110, 10, 0.28);
+      margin-bottom: 14px;
+    }
+    .plan-secondary {
+      width: 100%;
+      border: none;
+      border-radius: 22px;
+      padding: 20px 24px;
+      font-size: 20px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: default;
+      background: #fff3cd;
+      box-shadow: inset 4px 4px 10px rgba(206, 160, 34, 0.18);
+      margin-bottom: 18px;
+    }
+    .restore {
+      font-size: 17px;
+      font-weight: 700;
+      color: #6b5a2e;
+    }
+    .legal {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #8a7550;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="card">
+      <img class="avatar" src="../public/gio-face.svg" alt="" />
+      <h1>Cook with Gio Pro</h1>
+      <p class="sub">30× the recipes, chats, meal plans and fridge scans every month.</p>
+      <button type="button" class="plan-primary">Yearly — $49.99</button>
+      <button type="button" class="plan-secondary">Monthly — $6.99</button>
+      <p class="restore">Restore purchases</p>
+      <p class="legal">Auto-renewing subscription. Cancel anytime in Settings → Apple ID → Subscriptions.</p>
+    </div>
+  </div>
+</body>
+</html>

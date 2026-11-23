@@ -1,17 +1,23 @@
 {
   "name": "cookwithgio",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "start": "node server/standalone.ts",
+    "start": "node --env-file=.env.vault server/standalone.ts",
     "mobile:sync": "npm run build && cap sync",
+    "mobile:release": "npm run build && cap sync",
     "mobile:ios": "npm run mobile:sync && cap open ios",
-    "mobile:android": "npm run mobile:sync && cap open android"
+    "mobile:android": "npm run mobile:sync && cap open android",
+    "firebase:setup": "bash scripts/firebase-setup.sh",
+    "apple:signin-links": "bash scripts/apple-signin-open.sh",
+    "asc:subscriptions": "node scripts/asc-list-subscriptions.mjs",
+    "asc:subscription-review-shot": "python3 scripts/prepare_subscription_review_screenshot.py",
+    "asc:marketing-assets": "python3 scripts/prepare_asc_marketing_assets.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

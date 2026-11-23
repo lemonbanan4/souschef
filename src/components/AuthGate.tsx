@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import App from "../App";
-import { onAuthChange, type AppUser } from "../lib/auth";
+import { completeOAuthRedirectIfNeeded, onAuthChange, type AppUser } from "../lib/auth";
 import { pullAndApply } from "../lib/sync";
 import Login from "./Login";
 
@@ -17,6 +17,7 @@ export default function AuthGate() {
   const [user, setUser] = useState<AppUser | null>(null);
 
   useEffect(() => {
+    void completeOAuthRedirectIfNeeded();
     let resolvedOnce = false;
     const unsubscribe = onAuthChange((nextUser: AppUser | null) => {
       resolvedOnce = true;

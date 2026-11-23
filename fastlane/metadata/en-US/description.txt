@@ -1,0 +1,23 @@
+Meet Chef Gio—your playful AI cooking companion. Ask for any recipe, scan what's in your fridge, or spin the Mystery Basket for a Chopped-style challenge. Gio writes real, cookable dishes tailored to your pantry, taste, and goals—then walks you through every step.
+
+WHAT YOU CAN DO
+• Craving mode — describe what you want; get a full recipe with nutrition and chef tips
+• Pantry & fridge scan — photograph ingredients; Gio reads them and suggests dinners
+• Mystery Basket — three surprise ingredients, bonus XP when you cook it
+• Cook mode — step-by-step fullscreen guide, timers, and hands-free voice ("next", "timer", "finish")
+• Ask the chef — mid-recipe chat for substitutions, timing, and technique
+• Weekly meal plan — five dinners plus a consolidated grocery list
+• Shopping list — add items, recipes, or the whole week in one tap
+• Diet goals — cut, maintain, or bulk with live calorie and protein tracking
+• Gamification — XP, streaks, badges, cuisine passport, secret family recipes, and level-ups
+
+WHY GIO
+Cook with Gio isn't a static cookbook. It's a claymorphism kitchen built around a single personality—Italian flair, encouragement, and clear steps whether you're a beginner or a seasoned home cook.
+
+ACCOUNTS & SYNC
+Sign in with email, Google, or Apple. Your cookbook, streaks, and progress can sync across devices when you're signed in.
+
+COOK WITH GIO PRO
+Upgrade for higher monthly limits on AI recipes, chef chat, meal plans, and fridge scans—powered by secure in-app purchase.
+
+Made with amore. Buon appetito!

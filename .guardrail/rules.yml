@@ -1,0 +1,42 @@
+version: 1
+timeout_ms: 5000
+include:
+- '**/*.ts'
+- '**/*.tsx'
+- '**/*.py'
+- '**/*.js'
+- '**/*.cs'
+- '**/*'
+exclude: []
+rules:
+- id: presentation-imports-data
+  severity: medium
+  from: '**/presentation/**'
+  to: '**/data/**'
+  message: "Layer violation \u2014 presentation must not import the data layer directly"
+- id: ui-direct-db
+  severity: high
+  type: regex
+  match: '**/components/**'
+  pattern: (?i)(SqlConnection|NpgsqlConnection|mongoose\.connect|createClient\()
+  message: Direct database client usage in UI layer
+- id: hygiene-todo
+  severity: low
+  type: regex
+  pattern: (?i)\b(TODO|FIXME|HACK|XXX)\b
+  message: Resolve TODO/FIXME before merging
+- id: console-log
+  severity: medium
+  type: regex
+  pattern: console\.(log|debug)\(
+  message: "Debug logging left in source \u2014 remove before shipping"
+- id: placeholder-impl
+  severity: medium
+  type: regex
+  pattern: (?i)(throw new NotImplementedException|pass\s*#\s*todo|NotImplementedError)
+  message: "Unimplemented placeholder \u2014 finish the function"
+- id: no-hardcoded-secrets
+  severity: high
+  type: regex
+  pattern: (?i)(sk-ant-[a-z0-9_-]{8,}|sk-[a-z0-9]{16,}|rc_live_[a-z0-9_-]{8,}|ghp_[a-z0-9]{20,}|AKIA[0-9A-Z]{16}|(api[_-]?key|api[_-]?secret|auth[_-]?token|password)\s*[:=]\s*["'][^"'\s]{8,}["']|dangerouslyAllowBrowser\s*:\s*true)
+  message: "Hardcoded secret or unsafe browser API key usage — move to server/env"

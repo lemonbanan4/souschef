@@ -10,7 +10,18 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+build/
+vendor/bundle/
+.bundle/
+.firebase/
 *.local
+.env.production
+.env
+.env.vault
+.rulecloud.json
+.env.appstore
+*.p8
+AuthKey_*.p8
 
 # Editor directories and files
 .vscode/*
@@ -26,6 +37,8 @@ dist-ssr
 # souschef local usage store (dev metering)
 server/usage.json
 server/leaderboard.json
+server/cookwithgio-firebase-adminsdk.json
+server/*-firebase-adminsdk*.json
 
 # Capacitor native projects — regenerate with:
 #   npx cap add ios && npx cap add android && npx @capacitor/assets generate --ios --android

@@ -1,0 +1,17 @@
+Cook with Gio requires sign-in (email/password, Google, or Apple). No guest mode.
+
+App Review login (email/password):
+  Email: appreview@cookwithgio.com
+  Password: see demo_password.txt
+  Firebase uid: uzGt3eLM0UPFCNdO00RltHmGCNz1
+
+Core flows to exercise:
+1. Sign in → home → generate a recipe from "I'm craving…"
+2. Pantry tab → optional fridge photo (camera permission)
+3. Cook mode from any recipe → step navigation and timers
+4. Profile → streaks, XP, diet goal
+5. Settings → Upgrade opens Pro paywall (RevenueCat Test Store or sandbox IAP in review builds)
+
+Kitchen API: https://cookwithgio-production-5a892f42.up.railway.app (Firebase Bearer auth on /api/chef/*).
+
+Camera is used only for optional fridge/pantry ingredient scan.

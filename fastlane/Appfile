@@ -1,0 +1,6 @@
+app_identifier("com.cogcore.cookwithgio")
+
+# Optional — set in .env.appstore if you prefer not to hardcode:
+# apple_id(ENV["FASTLANE_APPLE_ID"])
+# team_id(ENV["ASC_TEAM_ID"])
+# itc_team_id(ENV["ASC_ITC_TEAM_ID"])

@@ -58,7 +58,7 @@ export default function ShareModal({ game, level, badgeTotal, onClose, onNotify 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal clay share-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal clay modal-scroll share-modal" onClick={(e) => e.stopPropagation()}>
         <h2>📤 Share your chef card</h2>
 
         <div className="mode-tabs" role="tablist" style={{ marginBottom: 12 }}>

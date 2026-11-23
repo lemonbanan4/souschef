@@ -11,6 +11,17 @@ export default function Login() {
 
   function friendlyError(err: unknown): string {
     const code = (err as { code?: string })?.code ?? "";
+    if (code.includes("unauthorized-domain")) {
+      return "Google/Apple sign-in isn't enabled for this site URL yet. Use email/password, or ask us to add this domain in Firebase.";
+    }
+    if (code.includes("popup-closed") || code.includes("cancelled-popup")) return "Sign-in was cancelled.";
+    if (code.includes("operation-not-allowed")) {
+      return "That sign-in provider isn't enabled. Try email/password.";
+    }
+    const msg = String((err as Error)?.message ?? "");
+    if (msg.includes("invalid_client") || code.includes("invalid-client")) {
+      return "Apple rejected the OAuth client. In Firebase → Apple, Service ID must be com.cogcore.cookwithgio.signin (not the App ID). In Apple Developer, Return URL must be exactly https://cookwithgio.firebaseapp.com/__/auth/handler";
+    }
     if (code.includes("wrong-password") || code.includes("invalid-credential")) return "Wrong email or password.";
     if (code.includes("email-already-in-use")) return "That email already has an account — try signing in instead.";
     if (code.includes("weak-password")) return "Password should be at least 6 characters.";

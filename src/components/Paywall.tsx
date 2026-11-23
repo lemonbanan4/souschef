@@ -51,7 +51,7 @@ export default function Paywall({ onClose, onPurchased }: Props) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal clay paywall-card">
+      <div className="modal clay modal-scroll paywall-card">
         <button className="icon-btn paywall-close" onClick={onClose} aria-label="Close">✕</button>
         <img src="/gio-face.svg" alt="Chef Gio" className="onboarding-avatar" />
         <h2>Cook with Gio Pro</h2>

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp",
+        "--dir",
+        ".",
+        "--only",
+        "core,auth,firestore"
+      ]
+    },
+    "rulecloud": {
+      "url": "https://rulecloud-production.up.railway.app/mcp/",
+      "headers": {
+        "X-API-Key": "${env:RULECLOUD_API_KEY}"
+      }
+    }
+  }
+}

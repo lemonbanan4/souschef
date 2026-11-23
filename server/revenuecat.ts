@@ -5,11 +5,13 @@ import { setTier } from "./usageStore.ts";
 /**
  * RevenueCat webhook — keeps our own tier record in sync with real
  * entitlement state. Configure the webhook URL + this secret in the
- * RevenueCat dashboard (Project Settings → Integrations → Webhooks).
- * RevenueCat sends the secret back as "Authorization: Bearer <secret>".
+ * RevenueCat dashboard (Project Settings → Integrations → Webhooks), or
+ * `scripts/revenuecat-wire.sh` with API v2. Point the URL at:
+ *   https://<your-railway-domain>/api/revenuecat/webhook
+ * RevenueCat sends the secret as "Authorization: Bearer <secret>".
  */
 
-const PRO_ENTITLEMENT = "pro";
+const PRO_ENTITLEMENT = "cook_with_gio_pro";
 
 const GRANT_EVENTS = new Set(["INITIAL_PURCHASE", "RENEWAL", "PRODUCT_CHANGE", "UNCANCELLATION"]);
 const REVOKE_EVENTS = new Set(["CANCELLATION", "EXPIRATION", "BILLING_ISSUE"]);

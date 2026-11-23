@@ -943,15 +943,28 @@ input, textarea, select {
   inset: 0;
   background: rgba(120, 90, 20, 0.25);
   backdrop-filter: blur(4px);
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 40;
-  padding: 20px;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal {
   width: min(460px, 100%);
   padding: 28px;
+  flex-shrink: 0;
+}
+
+.modal.modal-scroll {
+  max-height: min(88dvh, 88vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .modal h2 { font-size: 22px; margin-bottom: 8px; }

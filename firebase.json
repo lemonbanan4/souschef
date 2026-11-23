@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Cook with Gio",
+        "supportEmail": "developer@orbitroutine.com"
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": "firebase-hosting-public",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+  }
+}

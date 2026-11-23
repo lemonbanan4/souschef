@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — Cook with Gio</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; background: #fffaf0; color: #3d3117; font-family: -apple-system, BlinkMacSystemFont, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  .updated { color: #8a7a52; font-size: 14px; margin-bottom: 32px; }
+  h2 { font-size: 18px; margin-top: 36px; padding-bottom: 6px; border-bottom: 2px solid #ffe9a8; }
+  p, li { font-size: 15px; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  a { color: #b8860b; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ffe9a8; vertical-align: top; }
+  th { color: #6b4a2f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cook with Gio — Privacy Policy</h1>
+  <p class="updated">Last updated: November 22, 2026 · CogCore LLC</p>
+
+  <p>Cook with Gio is an AI cooking companion. This policy describes what we collect, why, and your choices. <strong>Sign-in is required.</strong> Most gameplay data syncs to your account; AI requests go through our kitchen server to Anthropic.</p>
+
+  <h2>Who we are</h2>
+  <p>Operator: <strong>CogCore LLC</strong>. Privacy contact: <a href="mailto:developer@orbitroutine.com">developer@orbitroutine.com</a>.</p>
+
+  <h2>Account &amp; identity (Firebase Authentication)</h2>
+  <p>You can sign in with email/password, Google, or Sign in with Apple. Firebase stores your account identifier and sign-in provider data. We use this to secure your account and sync your progress.</p>
+  <ul>
+    <li>Email address (when you use email sign-in or when a provider shares it)</li>
+    <li>Display name or profile fields your provider shares (optional)</li>
+    <li>Firebase user ID (used to link your data)</li>
+  </ul>
+  <p>See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Google Firebase privacy</a>.</p>
+
+  <h2>Data synced to your account (Cloud Firestore)</h2>
+  <p>When signed in, recipe history, pantry, shopping list, XP, streaks, badges, diet goals, nutrition log, and related preferences may be stored in Firestore under <code>users/{your uid}</code>. Only you can read or write this data (enforced by security rules).</p>
+
+  <h2>AI features (Anthropic Claude via kitchen API)</h2>
+  <p>When you generate recipes, chat with the chef, plan meals, or scan fridge photos, your prompts and images are sent to our server at the kitchen API, which forwards them to <strong>Anthropic</strong> to produce a response. We do not use your prompts to train our own models. Anthropic’s policy applies to their processing: <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">anthropic.com/legal/privacy</a>.</p>
+  <p>Requests include your Firebase ID token so we can meter free vs Pro usage. We do not permanently store full chat content on our servers for advertising.</p>
+
+  <h2>Photos &amp; camera</h2>
+  <p>Fridge/pantry scan uses the camera or photo library only when you choose a photo. That image is sent for ingredient recognition as described above. We do not access the camera in the background.</p>
+
+  <h2>Subscriptions (RevenueCat / Apple)</h2>
+  <p>Pro subscriptions are processed by Apple (and Google on Android). RevenueCat provides purchase status and entitlements in the app. We do not receive your full payment card number.</p>
+  <ul>
+    <li><a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener">RevenueCat privacy</a></li>
+    <li><a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple privacy</a></li>
+  </ul>
+
+  <h2>Optional leaderboard</h2>
+  <p>If you submit a public chef name and score, that display name and stats are stored server-side and shown to other players. You can stop participating by not using the feature.</p>
+
+  <h2>Local device data</h2>
+  <p>The app may cache data locally for performance and offline use. Uninstalling the app or signing out may clear some local state; cloud data remains until you delete your account.</p>
+
+  <h2>What we do not do</h2>
+  <ul>
+    <li>No advertising SDKs or cross-app tracking for ads</li>
+    <li>No selling of personal information</li>
+    <li>No precise location collection</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>The app is not directed at children under 13. We do not knowingly collect personal information from children under 13.</p>
+
+  <h2>Retention &amp; deletion</h2>
+  <p>Delete your account from the app (Settings) or email <a href="mailto:developer@orbitroutine.com">developer@orbitroutine.com</a> to request deletion of your Firebase account and Firestore profile. Apple may retain purchase records per their policies.</p>
+
+  <h2>Changes</h2>
+  <p>We may update this policy; the date above will change when we do.</p>
+
+  <p><a href="/support.html">Support</a> · <a href="https://cookwithgio.com">cookwithgio.com</a></p>
+</div>
+</body>
+</html>

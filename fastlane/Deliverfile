@@ -1,0 +1,16 @@
+# Cook with Gio — metadata + screenshots only (no binary, no review submit).
+# API key is supplied via Fastfile / scripts/push_appstore_metadata.sh (ASC_* env vars).
+
+app_identifier "com.cogcore.cookwithgio"
+platform "ios"
+app_version "1.0.1"
+
+skip_binary_upload true
+submit_for_review false
+force true
+automatic_release false
+run_precheck_before_submit false
+overwrite_screenshots true
+
+# Metadata lives in ./fastlane/metadata/
+# Screenshots in ./fastlane/screenshots/

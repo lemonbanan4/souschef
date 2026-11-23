@@ -6,4 +6,7 @@ ios
 android
 server/usage.json
 server/leaderboard.json
+server/cookwithgio-firebase-adminsdk*.json
+server/AuthKey_*.p8
+server/*.p8
 *.log
